@@ -52,4 +52,5 @@ pip install -r requirements.txt
 make help
 make test
 make lint
+make setup_githooks
 ```
