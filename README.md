@@ -42,6 +42,6 @@ Run the game:
 
 ```
 . ~/.virtualenvs/pyweek32-neverending/bin/activate
-python run_game.py
+./run_game.py
 ```
 
