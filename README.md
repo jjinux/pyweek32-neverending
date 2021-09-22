@@ -38,10 +38,17 @@ Install requirements:
 pip install -r requirements.txt
 ```
 
-Run the game:
+## Running
 
 ```
 . ~/.virtualenvs/pyweek32-neverending/bin/activate
 ./run_game.py
 ```
 
+## Developing
+
+```
+. ~/.virtualenvs/pyweek32-neverending/bin/activate
+make help
+make test
+```
