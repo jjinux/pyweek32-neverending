@@ -45,6 +45,9 @@ class MyGame(arcade.Window):
         """
         super().__init__(width, height, title, resizable=True)
 
+        self.pos_from_origin_x = None
+        self.pos_from_origin_y = None
+
         # Sprite lists
         self.player_list = None
         self.wall_list = None
@@ -62,6 +65,9 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """ Set up the game and initialize the variables. """
+
+        self.pos_from_origin_x = 0
+        self.pos_from_origin_y = 0
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
@@ -109,7 +115,7 @@ class MyGame(arcade.Window):
 
         # Draw the GUI
         arcade.draw_rectangle_filled(self.width // 2, 20, self.width, 40, arcade.color.ALMOND)
-        text = f"Scroll value: ({self.camera_sprites.position[0]:5.1f}, {self.camera_sprites.position[1]:5.1f})"
+        text = f"({self.pos_from_origin_x}, {self.pos_from_origin_y})"
         arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
 
     def on_key_press(self, key, modifiers):
@@ -145,11 +151,17 @@ class MyGame(arcade.Window):
         delta_x = self.player_sprite.center_x - prev_player_sprite_center_x
         delta_y = self.player_sprite.center_y - prev_player_sprite_center_y
 
+        self.pos_from_origin_x = round(self.pos_from_origin_x + delta_x)
+        self.pos_from_origin_y = round(self.pos_from_origin_y + delta_y)
+
         # Put the player back where he was and instead move the walls in the *opposite* direction.
         self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
         self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
         self.wall_list.move(-delta_x, -delta_y)
-        print("Moved: ", (delta_x, delta_y))
+
+        print("Position from origin:", (self.pos_from_origin_x, self.pos_from_origin_y))
+        print("    Moved: ", (delta_x, delta_y))
+
 
         self.wall_list.draw()
         self.player_list.draw()
