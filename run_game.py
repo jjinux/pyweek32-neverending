@@ -162,7 +162,6 @@ class MyGame(arcade.Window):
         print("Position from origin:", (self.pos_from_origin_x, self.pos_from_origin_y))
         print("    Moved: ", (delta_x, delta_y))
 
-
         self.wall_list.draw()
         self.player_list.draw()
 
