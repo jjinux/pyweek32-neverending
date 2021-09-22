@@ -1,0 +1,15 @@
+# editorconfig.org
+root = true
+
+# By default, we treat things like Python.
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Makefiles use tabs.
+[{Makefile,*.mk}]
+indent_style = tab
