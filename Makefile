@@ -10,8 +10,16 @@ test:  ## Run tests
 	python -m unittest discover -s ${PACKAGE} -p "*_test.py"
 
 .PHONY: lint
-lint: mypy  ## Run linters (mypy, etc.)
+lint: lint_mypy lint_black  ## Run all the linters
 
-.PHONY: mypy
-mypy:  ## Run mypy to check types
+.PHONY: lint_mypy
+lint_mypy:  ## Run mypy to check types
 	mypy ${PACKAGE} --strict
+
+.PHONY: lint_black
+lint_black:  ## Run black with --check to check the code formatting
+	black --check .
+
+.PHONY: lint_black_reformat
+lint_black_reformat:  ## Run black and reformat the code
+	black .
