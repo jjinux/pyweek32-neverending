@@ -11,7 +11,6 @@ SCREEN_TITLE = "pyweek32-neverending"
 
 
 class MyGame(arcade.Window):
-
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
@@ -25,9 +24,7 @@ class MyGame(arcade.Window):
 
 def main():
     if sys.version_info[:2] < MIN_PYTHON_VERSION:
-        sys.exit(
-            f"This game requires Python {'.'.join(map(str, MIN_PYTHON_VERSION))}"
-        )
+        sys.exit(f"This game requires Python {'.'.join(map(str, MIN_PYTHON_VERSION))}")
 
     window = MyGame()
     window.setup()
