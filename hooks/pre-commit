@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+make lint_black || {
+    echo "Reformatting with black. Please stage the changes and try committing again..."
+    make lint_black_reformat
+    exit 1
+}
