@@ -4,7 +4,7 @@
 
 Note that the arcade library requires OpenGL 3.3 and thus won't currently run on a Raspberry Pi.
 
-Install Python 3.9.7. Older versions may work as well. I used pyenv on a Mac, but you can do whatever suits you:
+Install Python 3.9.7. I used pyenv on a Mac, but you can do whatever suits you:
 
 ```
 brew update && brew upgrade pyenv
@@ -51,4 +51,5 @@ pip install -r requirements.txt
 . ~/.virtualenvs/pyweek32-neverending/bin/activate
 make help
 make test
+make lint
 ```
