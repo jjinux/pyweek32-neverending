@@ -23,3 +23,8 @@ lint_black:  ## Run black with --check to check the code formatting
 .PHONY: lint_black_reformat
 lint_black_reformat:  ## Run black and reformat the code
 	black .
+
+.PHONY: setup_githooks
+setup_githooks:  ## Setup githooks
+	rm -rf .git/hooks
+	ln -sf ../hooks .git/hooks
