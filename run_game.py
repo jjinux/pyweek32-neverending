@@ -14,6 +14,7 @@ import random
 import sys
 
 import arcade
+from pyglet.math import Vec2
 
 SPRITE_SCALING = 0.5
 
@@ -37,7 +38,7 @@ INITIAL_PLAYER_SPRITE_CENTER_Y = 0
 
 
 class MyGame(arcade.Window):
-    """ Main application class. """
+    """Main application class."""
 
     def __init__(self, width, height, title):
         """
@@ -64,7 +65,7 @@ class MyGame(arcade.Window):
         self.camera_gui = arcade.Camera(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
 
     def setup(self):
-        """ Set up the game and initialize the variables. """
+        """Set up the game and initialize the variables."""
 
         self.pos_from_origin_x = 0
         self.pos_from_origin_y = 0
@@ -74,8 +75,10 @@ class MyGame(arcade.Window):
         self.wall_list = arcade.SpriteList()
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(":resources:images/animated_characters/female_person/femalePerson_idle.png",
-                                           scale=0.4)
+        self.player_sprite = arcade.Sprite(
+            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
+            scale=0.4,
+        )
         self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
         self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
         self.player_list.append(self.player_sprite)
@@ -85,12 +88,16 @@ class MyGame(arcade.Window):
             for y in range(0, 1600, 64):
                 # Randomly skip a box so the player can find a way through
                 if random.randrange(5) > 0:
-                    wall = arcade.Sprite(":resources:images/tiles/grassCenter.png", SPRITE_SCALING)
+                    wall = arcade.Sprite(
+                        ":resources:images/tiles/grassCenter.png", SPRITE_SCALING
+                    )
                     wall.center_x = x
                     wall.center_y = y
                     self.wall_list.append(wall)
 
-        self.physics_engine = arcade.PhysicsEngineSimple(self.player_sprite, self.wall_list)
+        self.physics_engine = arcade.PhysicsEngineSimple(
+            self.player_sprite, self.wall_list
+        )
 
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
@@ -114,12 +121,14 @@ class MyGame(arcade.Window):
         self.camera_gui.use()
 
         # Draw the GUI
-        arcade.draw_rectangle_filled(self.width // 2, 20, self.width, 40, arcade.color.ALMOND)
+        arcade.draw_rectangle_filled(
+            self.width // 2, 20, self.width, 40, arcade.color.ALMOND
+        )
         text = f"({self.pos_from_origin_x}, {self.pos_from_origin_y})"
         arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
 
     def on_key_press(self, key, modifiers):
-        """Called whenever a key is pressed. """
+        """Called whenever a key is pressed."""
 
         if key == arcade.key.UP:
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED
@@ -131,7 +140,7 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
     def on_key_release(self, key, modifiers):
-        """Called when the user releases a key. """
+        """Called when the user releases a key."""
 
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_sprite.change_y = 0
@@ -139,7 +148,7 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = 0
 
     def on_update(self, delta_time):
-        """ Movement and game logic """
+        """Movement and game logic"""
 
         prev_player_sprite_center_x = self.player_sprite.center_x
         prev_player_sprite_center_y = self.player_sprite.center_y
@@ -167,9 +176,9 @@ class MyGame(arcade.Window):
 
         # Move the camera so that the player is in the middle. This should only be necessary the
         # first time around or when the window resizes, but it probably doesn't hurt to leave it here.
-        position = (
+        position = Vec2(
             self.player_sprite.center_x - self.width / 2,
-            self.player_sprite.center_y - self.height / 2
+            self.player_sprite.center_y - self.height / 2,
         )
         self.camera_sprites.move_to(position, CAMERA_SPEED)
 
