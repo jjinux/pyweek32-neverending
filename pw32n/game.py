@@ -171,7 +171,7 @@ class MyGame(arcade.Window):
         tile_point_diff = self.geo.diff_tile_points(prev_tile_points, new_tile_points)
         for tile_point in tile_point_diff.removed:
             sprite = self.spriteMap.pop(tile_point)
-            sprite.kill()
+            sprite.kill()  # type: ignore
         for tile_point in tile_point_diff.added:
             tile = self.pick_tile()
             sprite = arcade.Sprite(tile.filename, tile.scaling)
