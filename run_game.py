@@ -12,9 +12,9 @@ CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
 
 
-class MyGame(arcade.Window):
+class MainView(arcade.View):
     def __init__(self):
-        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        super().__init__()
         self.wall_list = None
         self.player_list = None
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
@@ -49,13 +49,48 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.player_list.draw()
 
+    def on_key_press(self, key, _modifiers):
+        """If user hits escape, go back to the main menu view"""
+        if key == arcade.key.ESCAPE:
+            game_over_view = GameOverView()
+            self.window.show_view(game_over_view)
+
+
+class GameOverView(arcade.View):
+    """Class to manage the game over view"""
+
+    def on_show(self):
+        """Called when switching to this view"""
+        arcade.set_background_color(arcade.color.BLACK)
+
+    def on_draw(self):
+        """Draw the game over view"""
+        arcade.start_render()
+        arcade.draw_text(
+            "Game Over - press ESCAPE to advance",
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT / 2,
+            arcade.color.WHITE,
+            30,
+            anchor_x="center",
+        )
+
+    def on_key_press(self, key, _modifiers):
+        """If user hits escape, go back to the main menu view"""
+        if key == arcade.key.ESCAPE:
+            main_view = MainView()
+            main_view.setup()
+            self.window.show_view(main_view)
+
 
 def main():
     if sys.version_info[:2] < MIN_PYTHON_VERSION:
         sys.exit(f"This game requires Python {'.'.join(map(str, MIN_PYTHON_VERSION))}")
 
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    main_view = MainView()
+    main_view.setup()
+    window.show_view(main_view)
     arcade.run()
 
 
