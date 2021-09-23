@@ -26,6 +26,8 @@ class MyGame(arcade.Window):
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
 
+        self.spriteMap: dict[geometry.OriginPoint, arcade.Sprite] = None
+
         # Sprite lists
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
@@ -49,8 +51,8 @@ class MyGame(arcade.Window):
         """Set up the game and initialize the variables."""
 
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
-
         self.geo.position = self.geo.initial_position
+        self.spriteMap = {}
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
@@ -66,20 +68,6 @@ class MyGame(arcade.Window):
         self.player_sprite.center_y = self.geo.initial_position.y
         self.player_list.append(self.player_sprite)
 
-        # Set up several columns of walls and grass.
-        for x in range(200, 1650, 210):
-            for y in range(0, 1600, 64):
-                tile = self.pick_tile()
-                sprite = arcade.Sprite(tile.filename, tile.scaling)
-                sprite.center_x = x
-                sprite.center_y = y
-                if tile == tiles.GRASS_TILE:
-                    self.grass_list.append(sprite)
-                elif tile == tiles.BOX_CRATE_TILE:
-                    self.wall_list.append(sprite)
-                else:
-                    raise ValueError(f"Unexpected tile: {tile}")
-
         self.physics_engine = arcade.PhysicsEngineSimple(
             self.player_sprite, self.wall_list
         )
@@ -89,9 +77,9 @@ class MyGame(arcade.Window):
 
     def pick_tile(self) -> tiles.TileDetails:
         if random.randrange(5) == 0:
-            return tiles.GRASS_TILE
-        else:
             return tiles.BOX_CRATE_TILE
+        else:
+            return tiles.GRASS_TILE
 
     def on_draw(self) -> None:
         """
@@ -149,11 +137,11 @@ class MyGame(arcade.Window):
         # example though.)
         self.physics_engine.update()  # type: ignore
 
-        delta_x = self.player_sprite.center_x - prev_player_sprite_center_x
-        delta_y = self.player_sprite.center_y - prev_player_sprite_center_y
+        delta_x = round(self.player_sprite.center_x - prev_player_sprite_center_x)
+        delta_y = round(self.player_sprite.center_y - prev_player_sprite_center_y)
 
         self.geo.position = geometry.OriginPoint(
-            round(self.geo.position.x + delta_x), round(self.geo.position.y + delta_y)
+            self.geo.position.x + delta_x, self.geo.position.y + delta_y
         )
 
         # Put the player back where he was and instead move the map in the *opposite* direction.
@@ -162,8 +150,7 @@ class MyGame(arcade.Window):
         for map_list in self.map_lists:
             map_list.move(-delta_x, -delta_y)
 
-        print("Position from origin:", (self.geo.position.x, self.geo.position.y))
-        print("    Moved: ", (delta_x, delta_y))
+        self.update_tiles()
 
         for map_list in self.map_lists:
             map_list.draw()
@@ -176,6 +163,28 @@ class MyGame(arcade.Window):
             self.player_sprite.center_y - self.height / 2,
         )
         self.camera_sprites.move_to(position, CAMERA_SPEED)
+
+    def update_tiles(self) -> None:
+        """Add and remove tiles as the user "moves" around."""
+        prev_tile_points = set(self.spriteMap.keys())
+        new_tile_points = set(self.geo.generate_tile_points())
+        tile_point_diff = self.geo.diff_tile_points(prev_tile_points, new_tile_points)
+        for tile_point in tile_point_diff.removed:
+            sprite = self.spriteMap.pop(tile_point)
+            sprite.kill()
+        for tile_point in tile_point_diff.added:
+            tile = self.pick_tile()
+            sprite = arcade.Sprite(tile.filename, tile.scaling)
+            self.spriteMap[tile_point] = sprite
+            tile_adventure_point = self.geo.origin_point_to_adventure_point(tile_point)
+            sprite.left = tile_adventure_point.x
+            sprite.top = tile_adventure_point.y
+            if tile == tiles.GRASS_TILE:
+                self.grass_list.append(sprite)
+            elif tile == tiles.BOX_CRATE_TILE:
+                self.wall_list.append(sprite)
+            else:
+                raise ValueError(f"Unexpected tile: {tile}")
 
     def on_resize(self, width: float, height: float) -> None:
         """
