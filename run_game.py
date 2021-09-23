@@ -12,11 +12,10 @@ python -m arcade.examples.sprite_move_scrolling
 
 import random
 import sys
+from typing import NamedTuple
 
 import arcade
 from pyglet.math import Vec2
-
-SPRITE_SCALING = 0.5
 
 MIN_PYTHON_VERSION = (3, 9)
 DEFAULT_SCREEN_WIDTH = 800
@@ -31,10 +30,23 @@ VIEWPORT_MARGIN = 220
 CAMERA_SPEED = 1.0
 
 # How fast the character moves
-PLAYER_MOVEMENT_SPEED = 7
+PLAYER_MOVEMENT_SPEED = 5
 
 INITIAL_PLAYER_SPRITE_CENTER_X = 0
 INITIAL_PLAYER_SPRITE_CENTER_Y = 0
+
+
+class SpriteDetails(NamedTuple):
+    filename: str
+    scaling: float
+
+
+PLAYER = SpriteDetails(
+    ":resources:images/animated_characters/female_person/femalePerson_idle.png",
+    scaling=0.4,
+)
+GRASS = SpriteDetails(":resources:images/topdown_tanks/tileGrass2.png", scaling=1.0)
+BOX_CRATE = SpriteDetails(":resources:images/tiles/boxCrate_double.png", scaling=0.5)
 
 
 class MyGame(arcade.Window):
@@ -51,7 +63,9 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_list = None
+        self.grass_list = None
         self.wall_list = None
+        self.map_lists = None
 
         # Set up the player
         self.player_sprite = None
@@ -72,25 +86,27 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
+        self.grass_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
+        self.map_lists = [self.grass_list, self.wall_list]
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(
-            ":resources:images/animated_characters/female_person/femalePerson_idle.png",
-            scale=0.4,
-        )
+        self.player_sprite = arcade.Sprite(PLAYER.filename, PLAYER.scaling)
         self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
         self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
         self.player_list.append(self.player_sprite)
 
-        # -- Set up several columns of walls
+        # Set up several columns of walls and grass.
         for x in range(200, 1650, 210):
             for y in range(0, 1600, 64):
                 # Randomly skip a box so the player can find a way through
-                if random.randrange(5) > 0:
-                    wall = arcade.Sprite(
-                        ":resources:images/tiles/grassCenter.png", SPRITE_SCALING
-                    )
+                if random.randrange(5) == 0:
+                    grass = arcade.Sprite(GRASS.filename, GRASS.scaling)
+                    grass.center_x = x
+                    grass.center_y = y
+                    self.grass_list.append(grass)
+                else:
+                    wall = arcade.Sprite(BOX_CRATE.filename, BOX_CRATE.scaling)
                     wall.center_x = x
                     wall.center_y = y
                     self.wall_list.append(wall)
@@ -114,7 +130,8 @@ class MyGame(arcade.Window):
         self.camera_sprites.use()
 
         # Draw all the sprites.
-        self.wall_list.draw()
+        for map_list in self.map_lists:
+            map_list.draw()
         self.player_list.draw()
 
         # Select the (unscrolled) camera for our GUI
@@ -163,15 +180,17 @@ class MyGame(arcade.Window):
         self.pos_from_origin_x = round(self.pos_from_origin_x + delta_x)
         self.pos_from_origin_y = round(self.pos_from_origin_y + delta_y)
 
-        # Put the player back where he was and instead move the walls in the *opposite* direction.
+        # Put the player back where he was and instead move the map in the *opposite* direction.
         self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
         self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
-        self.wall_list.move(-delta_x, -delta_y)
+        for map_list in self.map_lists:
+            map_list.move(-delta_x, -delta_y)
 
         print("Position from origin:", (self.pos_from_origin_x, self.pos_from_origin_y))
         print("    Moved: ", (delta_x, delta_y))
 
-        self.wall_list.draw()
+        for map_list in self.map_lists:
+            map_list.draw()
         self.player_list.draw()
 
         # Move the camera so that the player is in the middle. This should only be necessary the
