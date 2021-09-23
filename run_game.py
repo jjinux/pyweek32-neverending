@@ -25,17 +25,17 @@ INITIAL_PLAYER_SPRITE_CENTER_X = 0
 INITIAL_PLAYER_SPRITE_CENTER_Y = 0
 
 
-class SpriteDetails(NamedTuple):
+class TileDetails(NamedTuple):
     filename: str
     scaling: float
 
 
-PLAYER = SpriteDetails(
+PLAYER_TILE = TileDetails(
     ":resources:images/animated_characters/female_person/femalePerson_idle.png",
     scaling=0.4,
 )
-GRASS = SpriteDetails(":resources:images/topdown_tanks/tileGrass2.png", scaling=1.0)
-BOX_CRATE = SpriteDetails(":resources:images/tiles/boxCrate_double.png", scaling=0.5)
+GRASS_TILE = TileDetails(":resources:images/topdown_tanks/tileGrass2.png", scaling=1.0)
+BOX_CRATE_TILE = TileDetails(":resources:images/tiles/boxCrate_double.png", scaling=0.5)
 
 
 class MyGame(arcade.Window):
@@ -87,7 +87,7 @@ class MyGame(arcade.Window):
         self.map_lists = [self.grass_list, self.wall_list]
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(PLAYER.filename, PLAYER.scaling)
+        self.player_sprite = arcade.Sprite(PLAYER_TILE.filename, PLAYER_TILE.scaling)
         self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
         self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
         self.player_list.append(self.player_sprite)
@@ -95,17 +95,16 @@ class MyGame(arcade.Window):
         # Set up several columns of walls and grass.
         for x in range(200, 1650, 210):
             for y in range(0, 1600, 64):
-                # Randomly skip a box so the player can find a way through
-                if random.randrange(5) == 0:
-                    grass = arcade.Sprite(GRASS.filename, GRASS.scaling)
-                    grass.center_x = x
-                    grass.center_y = y
-                    self.grass_list.append(grass)
+                tile = self.pick_tile()
+                sprite = arcade.Sprite(tile.filename, tile.scaling)
+                sprite.center_x = x
+                sprite.center_y = y
+                if tile == GRASS_TILE:
+                    self.grass_list.append(sprite)
+                elif tile == BOX_CRATE_TILE:
+                    self.wall_list.append(sprite)
                 else:
-                    wall = arcade.Sprite(BOX_CRATE.filename, BOX_CRATE.scaling)
-                    wall.center_x = x
-                    wall.center_y = y
-                    self.wall_list.append(wall)
+                    raise ValueError(f"Unexpected tile: {tile}")
 
         self.physics_engine = arcade.PhysicsEngineSimple(
             self.player_sprite, self.wall_list
@@ -113,6 +112,12 @@ class MyGame(arcade.Window):
 
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
+
+    def pick_tile(self):
+        if random.randrange(5) == 0:
+            return GRASS_TILE
+        else:
+            return BOX_CRATE_TILE
 
     def on_draw(self):
         """
