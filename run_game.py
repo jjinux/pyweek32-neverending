@@ -10,6 +10,7 @@ SCREEN_HEIGHT = 650
 SCREEN_TITLE = "pyweek32-neverending"
 CHARACTER_SCALING = 1
 TILE_SCALING = 0.5
+BATTLE_VIEW_MARGIN = 100
 
 
 class MainView(arcade.View):
@@ -52,12 +53,32 @@ class MainView(arcade.View):
     def on_key_press(self, key, _modifiers):
         """If user hits escape, go back to the main menu view"""
         if key == arcade.key.ESCAPE:
-            game_over_view = GameOverView()
-            self.window.show_view(game_over_view)
+            battle_view = BattleView()
+            battle_view.setup()
+            self.window.show_view(battle_view)
 
 
-class GameOverView(arcade.View):
-    """Class to manage the game over view"""
+class BattleView(arcade.View):
+    def __init__(self):
+        super().__init__()
+        self.player_list = None
+        self.enemy_list = None
+
+    def setup(self):
+        self.player_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
+
+        image_source = ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png"
+        self.player_sprite = arcade.Sprite(image_source)
+        self.player_sprite.left = BATTLE_VIEW_MARGIN
+        self.player_sprite.bottom = BATTLE_VIEW_MARGIN
+        self.player_list.append(self.player_sprite)
+
+        image_source = ":resources:images/enemies/slimeGreen.png"
+        enemy_sprite = arcade.Sprite(image_source)
+        enemy_sprite.right = SCREEN_WIDTH - BATTLE_VIEW_MARGIN
+        enemy_sprite.top = SCREEN_HEIGHT - BATTLE_VIEW_MARGIN
+        self.enemy_list.append(enemy_sprite)
 
     def on_show(self):
         """Called when switching to this view"""
@@ -66,14 +87,8 @@ class GameOverView(arcade.View):
     def on_draw(self):
         """Draw the game over view"""
         arcade.start_render()
-        arcade.draw_text(
-            "Game Over - press ESCAPE to advance",
-            SCREEN_WIDTH / 2,
-            SCREEN_HEIGHT / 2,
-            arcade.color.WHITE,
-            30,
-            anchor_x="center",
-        )
+        self.player_list.draw()
+        self.enemy_list.draw()
 
     def on_key_press(self, key, _modifiers):
         """If user hits escape, go back to the main menu view"""
