@@ -2,8 +2,9 @@ import random
 from typing import NamedTuple
 
 import arcade
+from pyglet.math import Vec2  # type: ignore
+
 from pw32n import geometry
-from pyglet.math import Vec2
 
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
 
@@ -34,7 +35,7 @@ BOX_CRATE_TILE = TileDetails(":resources:images/tiles/boxCrate_double.png", scal
 class MyGame(arcade.Window):
     """Main application class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # I need this first since it has screen_width and screen_height.
         self.geo = geometry.Geometry()
@@ -43,20 +44,20 @@ class MyGame(arcade.Window):
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
 
-        self.pos_from_origin_x = None
-        self.pos_from_origin_y = None
+        self.pos_from_origin_x = 0
+        self.pos_from_origin_y = 0
 
         # Sprite lists
-        self.player_list = None
-        self.grass_list = None
-        self.wall_list = None
-        self.map_lists = None
+        self.player_list: arcade.SpriteList = None
+        self.grass_list: arcade.SpriteList = None
+        self.wall_list: arcade.SpriteList = None
+        self.map_lists: list[arcade.SpriteList] = None
 
         # Set up the player
-        self.player_sprite = None
+        self.player_sprite: arcade.Sprite = None
 
         # Physics engine so we don't run into walls.
-        self.physics_engine = None
+        self.physics_engine: arcade.PhysicsEngineSimple = None
 
         # Create the cameras. One for the GUI, one for the sprites.
         # We scroll the 'sprite world' but not the GUI.
@@ -65,7 +66,7 @@ class MyGame(arcade.Window):
         )
         self.camera_gui = arcade.Camera(self.geo.screen_width, self.geo.screen_height)
 
-    def setup(self):
+    def setup(self) -> None:
         """Set up the game and initialize the variables."""
 
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
@@ -106,13 +107,13 @@ class MyGame(arcade.Window):
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
 
-    def pick_tile(self):
+    def pick_tile(self) -> TileDetails:
         if random.randrange(5) == 0:
             return GRASS_TILE
         else:
             return BOX_CRATE_TILE
 
-    def on_draw(self):
+    def on_draw(self) -> None:
         """
         Render the screen.
         """
@@ -121,7 +122,7 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # Select the camera we'll use to draw all our sprites
-        self.camera_sprites.use()
+        self.camera_sprites.use()  # type: ignore
 
         # Draw all the sprites.
         for map_list in self.map_lists:
@@ -129,7 +130,7 @@ class MyGame(arcade.Window):
         self.player_list.draw()
 
         # Select the (unscrolled) camera for our GUI
-        self.camera_gui.use()
+        self.camera_gui.use()  # type: ignore
 
         # Draw the GUI
         arcade.draw_rectangle_filled(
@@ -138,27 +139,27 @@ class MyGame(arcade.Window):
         text = f"({self.pos_from_origin_x}, {self.pos_from_origin_y})"
         arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
 
-    def on_key_press(self, key, modifiers):
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
         """Called whenever a key is pressed."""
 
-        if key == arcade.key.UP:
+        if symbol == arcade.key.UP:
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED
-        elif key == arcade.key.DOWN:
+        elif symbol == arcade.key.DOWN:
             self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED
-        elif key == arcade.key.LEFT:
+        elif symbol == arcade.key.LEFT:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
+        elif symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
-    def on_key_release(self, key, modifiers):
+    def on_key_release(self, symbol: int, modifiers: int) -> None:
         """Called when the user releases a key."""
 
-        if key == arcade.key.UP or key == arcade.key.DOWN:
+        if symbol == arcade.key.UP or symbol == arcade.key.DOWN:
             self.player_sprite.change_y = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        elif symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = 0
 
-    def on_update(self, delta_time):
+    def on_update(self, delta_time: float) -> None:
         """Movement and game logic"""
 
         prev_player_sprite_center_x = self.player_sprite.center_x
@@ -166,7 +167,7 @@ class MyGame(arcade.Window):
 
         # Call update on all sprites (The sprites don't do much in this
         # example though.)
-        self.physics_engine.update()
+        self.physics_engine.update()  # type: ignore
 
         delta_x = self.player_sprite.center_x - prev_player_sprite_center_x
         delta_y = self.player_sprite.center_y - prev_player_sprite_center_y
@@ -195,7 +196,7 @@ class MyGame(arcade.Window):
         )
         self.camera_sprites.move_to(position, CAMERA_SPEED)
 
-    def on_resize(self, width, height):
+    def on_resize(self, width: float, height: float) -> None:
         """
         Resize window
         Handle the user grabbing the edge and resizing the window.
@@ -208,7 +209,7 @@ class MyGame(arcade.Window):
         self.camera_gui.resize(width, height)
 
 
-def main():
+def main() -> None:
     window = MyGame()
     window.setup()
-    arcade.run()
+    arcade.run()  # type: ignore
