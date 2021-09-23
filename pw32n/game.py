@@ -44,9 +44,6 @@ class MyGame(arcade.Window):
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
 
-        self.pos_from_origin_x = 0
-        self.pos_from_origin_y = 0
-
         # Sprite lists
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
@@ -71,8 +68,7 @@ class MyGame(arcade.Window):
 
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
 
-        self.pos_from_origin_x = 0
-        self.pos_from_origin_y = 0
+        self.geo.position = self.geo.initial_position
 
         # Sprite lists
         self.player_list = arcade.SpriteList()
@@ -136,7 +132,7 @@ class MyGame(arcade.Window):
         arcade.draw_rectangle_filled(
             self.width // 2, 20, self.width, 40, arcade.color.ALMOND
         )
-        text = f"({self.pos_from_origin_x}, {self.pos_from_origin_y})"
+        text = f"({self.geo.position.x}, {self.geo.position.y})"
         arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
@@ -172,8 +168,9 @@ class MyGame(arcade.Window):
         delta_x = self.player_sprite.center_x - prev_player_sprite_center_x
         delta_y = self.player_sprite.center_y - prev_player_sprite_center_y
 
-        self.pos_from_origin_x = round(self.pos_from_origin_x + delta_x)
-        self.pos_from_origin_y = round(self.pos_from_origin_y + delta_y)
+        self.geo.position = geometry.OriginPoint(
+            round(self.geo.position.x + delta_x), round(self.geo.position.y + delta_y)
+        )
 
         # Put the player back where he was and instead move the map in the *opposite* direction.
         self.player_sprite.center_x = self.geo.initial_position.x
@@ -181,7 +178,7 @@ class MyGame(arcade.Window):
         for map_list in self.map_lists:
             map_list.move(-delta_x, -delta_y)
 
-        print("Position from origin:", (self.pos_from_origin_x, self.pos_from_origin_y))
+        print("Position from origin:", (self.geo.position.x, self.geo.position.y))
         print("    Moved: ", (delta_x, delta_y))
 
         for map_list in self.map_lists:
