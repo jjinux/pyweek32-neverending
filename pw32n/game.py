@@ -1,10 +1,9 @@
 import random
-from typing import NamedTuple
 
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geometry
+from pw32n import geometry, tiles
 
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
 
@@ -13,19 +12,6 @@ CAMERA_SPEED = 1.0
 
 # How fast the character moves
 PLAYER_MOVEMENT_SPEED = 5
-
-
-class TileDetails(NamedTuple):
-    filename: str
-    scaling: float
-
-
-PLAYER_TILE = TileDetails(
-    ":resources:images/animated_characters/female_person/femalePerson_idle.png",
-    scaling=0.4,
-)
-GRASS_TILE = TileDetails(":resources:images/topdown_tanks/tileGrass2.png", scaling=1.0)
-BOX_CRATE_TILE = TileDetails(":resources:images/tiles/boxCrate_double.png", scaling=0.5)
 
 
 class MyGame(arcade.Window):
@@ -73,7 +59,9 @@ class MyGame(arcade.Window):
         self.map_lists = [self.grass_list, self.wall_list]
 
         # Set up the player
-        self.player_sprite = arcade.Sprite(PLAYER_TILE.filename, PLAYER_TILE.scaling)
+        self.player_sprite = arcade.Sprite(
+            tiles.PLAYER_TILE.filename, tiles.PLAYER_TILE.scaling
+        )
         self.player_sprite.center_x = self.geo.initial_position.x
         self.player_sprite.center_y = self.geo.initial_position.y
         self.player_list.append(self.player_sprite)
@@ -85,9 +73,9 @@ class MyGame(arcade.Window):
                 sprite = arcade.Sprite(tile.filename, tile.scaling)
                 sprite.center_x = x
                 sprite.center_y = y
-                if tile == GRASS_TILE:
+                if tile == tiles.GRASS_TILE:
                     self.grass_list.append(sprite)
-                elif tile == BOX_CRATE_TILE:
+                elif tile == tiles.BOX_CRATE_TILE:
                     self.wall_list.append(sprite)
                 else:
                     raise ValueError(f"Unexpected tile: {tile}")
@@ -99,11 +87,11 @@ class MyGame(arcade.Window):
         # Set the background color
         arcade.set_background_color(arcade.color.AMAZON)
 
-    def pick_tile(self) -> TileDetails:
+    def pick_tile(self) -> tiles.TileDetails:
         if random.randrange(5) == 0:
-            return GRASS_TILE
+            return tiles.GRASS_TILE
         else:
-            return BOX_CRATE_TILE
+            return tiles.BOX_CRATE_TILE
 
     def on_draw(self) -> None:
         """
