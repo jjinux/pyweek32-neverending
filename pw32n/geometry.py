@@ -39,6 +39,7 @@ class Geometry:
         self.screen_height: AdventureDistance = 600
         self.min_screen_width: AdventureDistance = 800
         self.min_screen_height: AdventureDistance = 600
+        self.initial_position = OriginPoint(0, 0)
         self.position = OriginPoint(0, 0)
 
     def align_x(self, x: OriginDistance) -> OriginDistance:

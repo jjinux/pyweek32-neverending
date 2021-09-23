@@ -21,9 +21,6 @@ CAMERA_SPEED = 1.0
 # How fast the character moves
 PLAYER_MOVEMENT_SPEED = 5
 
-INITIAL_PLAYER_SPRITE_CENTER_X = 0
-INITIAL_PLAYER_SPRITE_CENTER_Y = 0
-
 
 class TileDetails(NamedTuple):
     filename: str
@@ -88,8 +85,8 @@ class MyGame(arcade.Window):
 
         # Set up the player
         self.player_sprite = arcade.Sprite(PLAYER_TILE.filename, PLAYER_TILE.scaling)
-        self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
-        self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
+        self.player_sprite.center_x = self.geo.initial_position.x
+        self.player_sprite.center_y = self.geo.initial_position.y
         self.player_list.append(self.player_sprite)
 
         # Set up several columns of walls and grass.
@@ -182,8 +179,8 @@ class MyGame(arcade.Window):
         self.pos_from_origin_y = round(self.pos_from_origin_y + delta_y)
 
         # Put the player back where he was and instead move the map in the *opposite* direction.
-        self.player_sprite.center_x = INITIAL_PLAYER_SPRITE_CENTER_X
-        self.player_sprite.center_y = INITIAL_PLAYER_SPRITE_CENTER_Y
+        self.player_sprite.center_x = self.geo.initial_position.x
+        self.player_sprite.center_y = self.geo.initial_position.y
         for map_list in self.map_lists:
             map_list.move(-delta_x, -delta_y)
 
