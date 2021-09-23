@@ -36,6 +36,7 @@ class MyGame(arcade.Window):
 
         # Set up the player
         self.player_sprite: arcade.Sprite = None
+        self.strength = 1.0
 
         # Physics engine so we don't run into walls.
         self.physics_engine: arcade.PhysicsEngineSimple = None
@@ -104,7 +105,7 @@ class MyGame(arcade.Window):
         arcade.draw_rectangle_filled(
             self.width // 2, 20, self.width, 40, arcade.color.ALMOND
         )
-        text = f"({self.geo.position.x}, {self.geo.position.y})"
+        text = f"Pos: ({self.geo.position.x}, {self.geo.position.y}) Strength: {self.strength:.1f}"
         arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
@@ -143,6 +144,8 @@ class MyGame(arcade.Window):
         self.geo.position = geometry.OriginPoint(
             self.geo.position.x + delta_x, self.geo.position.y + delta_y
         )
+
+        self.strength += (abs(delta_x) + abs(delta_y)) * 0.001
 
         # Put the player back where he was and instead move the map in the *opposite* direction.
         self.player_sprite.center_x = self.geo.initial_position.x
