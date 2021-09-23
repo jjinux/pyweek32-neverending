@@ -115,5 +115,5 @@ class TestGeometry(unittest.TestCase):
             self.geo.position.x + 1,
             self.geo.position.y + 1,
         )
-        expected_ap = geometry.AdventurePoint(center.x + 1, center.y + 1)
+        expected_ap = geometry.AdventurePoint(1, 1)
         self.assertEqual(self.geo.origin_point_to_adventure_point(op), expected_ap)

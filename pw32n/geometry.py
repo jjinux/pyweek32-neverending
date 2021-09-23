@@ -123,8 +123,7 @@ class Geometry:
         return AdventurePoint(self.center_of_screen_x(), self.center_of_screen_y())
 
     def origin_point_to_adventure_point(self, op: OriginPoint) -> AdventurePoint:
-        center: AdventurePoint = self.center_of_screen()
         return AdventurePoint(
-            op.x - self.position.x + center.x,
-            op.y - self.position.y + center.y,
+            op.x - self.position.x,
+            op.y - self.position.y,
         )
