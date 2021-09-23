@@ -8,10 +8,6 @@ from pw32n import geometry
 
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
 
-# How many pixels to keep as a minimum margin between the character
-# and the edge of the screen.
-VIEWPORT_MARGIN = 220
-
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 1.0
 
