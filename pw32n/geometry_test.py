@@ -13,6 +13,8 @@ class SmallGeometry(geometry.Geometry):
         self.tile_height: geometry.AdventureDistance = 5
         self.screen_width: geometry.AdventureDistance = 100
         self.screen_height: geometry.AdventureDistance = 80
+        self.min_screen_width: geometry.AdventureDistance = 100
+        self.min_screen_height: geometry.AdventureDistance = 80
         self.position = geometry.OriginPoint(20, 20)
 
 
