@@ -73,10 +73,11 @@ class Geometry:
 
     def right_tile_boundary(self) -> OriginDistance:
         """See left_tile_boundary."""
-        # align_x may pull it further left so that it's less than 2 tile_widths from the right
-        # of the screen.
+        # align_x may pull it further left so that it's less than 3 tile_widths from the right
+        # of the screen. The 3 is helpful because the tile begins *to the left of* the player
+        # sprite.
         return self.align_x(
-            self.position.x + self.screen_width // 2 + 2 * self.tile_width
+            self.position.x + self.screen_width // 2 + 3 * self.tile_width
         )
 
     def top_tile_boundary(self) -> OriginDistance:
@@ -89,10 +90,10 @@ class Geometry:
 
     def bottom_tile_boundary(self) -> OriginDistance:
         """See left_tile_boundary."""
-        # align_y may pull it further up so that it's less than 2 tile_heights from the bottom
-        # of the screen.
+        # align_y may pull it further up so that it's less than 3 tile_heights from the bottom
+        # of the screen. The 3 is helpful because the tile begins *above* the player sprite.
         return self.align_y(
-            self.position.y - self.screen_height // 2 - 2 * self.tile_height
+            self.position.y - self.screen_height // 2 - 3 * self.tile_height
         )
 
     def generate_tile_points(self) -> Iterator[OriginPoint]:

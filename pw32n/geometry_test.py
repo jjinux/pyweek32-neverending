@@ -72,13 +72,13 @@ class TestGeometry(unittest.TestCase):
         self.assertEqual(self.geo.left_tile_boundary(), geometry.OriginDistance(-35))
 
     def test_right_tile_boundary(self) -> None:
-        self.assertEqual(self.geo.right_tile_boundary(), geometry.OriginDistance(80))
+        self.assertEqual(self.geo.right_tile_boundary(), geometry.OriginDistance(85))
 
     def test_top_tile_boundary(self) -> None:
         self.assertEqual(self.geo.top_tile_boundary(), geometry.OriginDistance(65))
 
     def test_bottom_tile_boundary(self) -> None:
-        self.assertEqual(self.geo.bottom_tile_boundary(), geometry.OriginDistance(-30))
+        self.assertEqual(self.geo.bottom_tile_boundary(), geometry.OriginDistance(-35))
 
     def test_generate_tile_points(self) -> None:
         tile_points = list(self.geo.generate_tile_points())
