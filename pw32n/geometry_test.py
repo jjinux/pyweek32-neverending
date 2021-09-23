@@ -18,7 +18,7 @@ class SmallGeometry(geometry.Geometry):
         self.position = geometry.OriginPoint(20, 20)
 
 
-class TestGeometry(unittest.TestCase):
+class GeometryTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.geo = SmallGeometry()
 
