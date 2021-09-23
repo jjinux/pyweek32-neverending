@@ -1,25 +1,14 @@
 #!/usr/bin/env python3.9
 
-
-"""
-Scroll around a large screen.
-
-Artwork from https://kenney.nl
-
-If Python and Arcade are installed, this example can be run from the command line with:
-python -m arcade.examples.sprite_move_scrolling
-"""
-
 import random
 import sys
 from typing import NamedTuple
 
 import arcade
+from pw32n import geometry
 from pyglet.math import Vec2
 
 MIN_PYTHON_VERSION = (3, 9)
-DEFAULT_SCREEN_WIDTH = 800
-DEFAULT_SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
 
 # How many pixels to keep as a minimum margin between the character
@@ -52,11 +41,14 @@ BOX_CRATE = SpriteDetails(":resources:images/tiles/boxCrate_double.png", scaling
 class MyGame(arcade.Window):
     """Main application class."""
 
-    def __init__(self, width, height, title):
-        """
-        Initializer
-        """
-        super().__init__(width, height, title, resizable=True)
+    def __init__(self):
+
+        # I need this first since it has screen_width and screen_height.
+        self.geo = geometry.Geometry()
+
+        super().__init__(
+            self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
+        )
 
         self.pos_from_origin_x = None
         self.pos_from_origin_y = None
@@ -75,11 +67,15 @@ class MyGame(arcade.Window):
 
         # Create the cameras. One for the GUI, one for the sprites.
         # We scroll the 'sprite world' but not the GUI.
-        self.camera_sprites = arcade.Camera(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
-        self.camera_gui = arcade.Camera(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
+        self.camera_sprites = arcade.Camera(
+            self.geo.screen_width, self.geo.screen_height
+        )
+        self.camera_gui = arcade.Camera(self.geo.screen_width, self.geo.screen_height)
 
     def setup(self):
         """Set up the game and initialize the variables."""
+
+        self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
 
         self.pos_from_origin_x = 0
         self.pos_from_origin_y = 0
@@ -206,15 +202,19 @@ class MyGame(arcade.Window):
         Resize window
         Handle the user grabbing the edge and resizing the window.
         """
-        self.camera_sprites.resize(int(width), int(height))
-        self.camera_gui.resize(int(width), int(height))
+        width = int(width)
+        height = int(height)
+        self.geo.screen_width = width
+        self.geo.screen_height = height
+        self.camera_sprites.resize(width, height)
+        self.camera_gui.resize(width, height)
 
 
 def main():
     if sys.version_info[:2] < MIN_PYTHON_VERSION:
         sys.exit(f"This game requires Python {'.'.join(map(str, MIN_PYTHON_VERSION))}")
 
-    window = MyGame(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, SCREEN_TITLE)
+    window = MyGame()
     window.setup()
     arcade.run()
 
