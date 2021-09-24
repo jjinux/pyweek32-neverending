@@ -1,6 +1,6 @@
 import unittest
 
-from pw32n.player_model import PlayerModel
+from pw32n.models import PlayerModel
 
 
 class PlayerModelTestCase(unittest.TestCase):

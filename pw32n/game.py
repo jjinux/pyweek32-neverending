@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, sprite_images, player_model, tiles, enemy_sprites
+from pw32n import geography, sprite_images, models, tiles, enemy_sprites
 
 SCREEN_TITLE = "pyweek32-neverending"
 
@@ -14,7 +14,7 @@ class GameWindow(arcade.Window):
         super().__init__(
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
-        self.player_model = player_model.PlayerModel()
+        self.player_model = models.PlayerModel()
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
         self.show_view(WorldView())
 
