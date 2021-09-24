@@ -14,7 +14,7 @@ lint: lint_mypy lint_black  ## Run all the linters
 
 .PHONY: lint_mypy
 lint_mypy:  ## Run mypy to check types
-	mypy ${PACKAGE} --strict
+	mypy ${PACKAGE} --strict --no-strict-optional
 
 .PHONY: lint_black
 lint_black:  ## Run black with --check to check the code formatting
