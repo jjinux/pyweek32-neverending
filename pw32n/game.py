@@ -120,7 +120,7 @@ class WorldView(arcade.View):
             return
         enemy_strength = models.pick_enemy_strength(op)
         enemy_model = models.EnemyModel(enemy_strength)
-        enemy = enemy_sprites.EnemySprite(sprite_images.SLIME_IMAGE, enemy_model)
+        enemy = enemy_sprites.EnemySprite(sprite_images.ZOMBIE_IMAGE, enemy_model)
         ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(op)
         enemy.left = ap.x
         enemy.top = ap.y
@@ -259,7 +259,7 @@ class BattleView(arcade.View):
         self.player_list.append(self.player_sprite)
 
         self.enemy_sprite = arcade.Sprite(
-            sprite_images.SLIME_BATTLE_VIEW_IMAGE.filename,
+            sprite_images.ZOMBIE_BATTLE_VIEW_IMAGE.filename,
             scale=sprite_images.PLAYER_BATTLE_VIEW_IMAGE.scaling,
         )
         self.enemy_list.append(self.enemy_sprite)

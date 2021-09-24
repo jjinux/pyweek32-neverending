@@ -36,9 +36,11 @@ GRASS_SIDE_VIEW_TILE_IMAGE = SpriteImage(
 )
 
 # It's 128x128, and I want 64x64.
-SLIME_IMAGE = SpriteImage(":resources:images/enemies/slimeBlue.png", scaling=0.5)
+ZOMBIE_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/zombie/zombie_idle.png", scaling=0.5
+)
 
 # It's 128x128, and I want 128x128.
-SLIME_BATTLE_VIEW_IMAGE = SpriteImage(
-    ":resources:images/enemies/slimeGreen.png", scaling=1.0
+ZOMBIE_BATTLE_VIEW_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/zombie/zombie_idle.png", scaling=1.0
 )
