@@ -15,11 +15,11 @@ CAMERA_SPEED = 1.0
 
 
 class GameWindow(arcade.Window):
-    def __init__(self, geo: geography.Geography) -> None:
+    def __init__(self) -> None:
+        self.geo = geography.Geography()
         super().__init__(
-            geo.screen_width, geo.screen_height, SCREEN_TITLE, resizable=True
+            self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
-        self.geo = geo
         self.player_model = player_model.PlayerModel()
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
         self.show_view(WorldView())
@@ -36,32 +36,22 @@ class WorldView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
-        self.spriteMap: dict[geography.OriginPoint, arcade.Sprite] = None
-        self.player_list: arcade.SpriteList = None
-        self.grass_list: arcade.SpriteList = None
-        self.wall_list: arcade.SpriteList = None
-        self.tile_sprite_lists: list[arcade.SpriteList] = None
-        self.player_sprite: arcade.Sprite = None
-        self.physics_engine: arcade.PhysicsEngineSimple = None
-        self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
-        self.camera_gui = arcade.Camera(self.window.width, self.window.height)
-        self.setup()
-
-    def setup(self) -> None:
-        self.geo.position = self.geo.initial_position
-        self.spriteMap = {}
-
+        self.spriteMap: dict[geography.OriginPoint, arcade.Sprite] = {}
         self.player_list = arcade.SpriteList()
         self.grass_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
-        self.tile_sprite_lists = [self.grass_list, self.wall_list]
-
+        self.tile_sprite_lists: list[arcade.SpriteList] = [
+            self.grass_list,
+            self.wall_list,
+        ]
         self.player_sprite = arcade.Sprite(
             sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
         )
-        self.player_sprite.center_x = self.geo.initial_position.x
-        self.player_sprite.center_y = self.geo.initial_position.y
+        self.player_sprite.center_x = 0
+        self.player_sprite.center_y = 0
         self.player_list.append(self.player_sprite)
+        self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
+        self.camera_gui = arcade.Camera(self.window.width, self.window.height)
 
         # This keeps us from walking through walls.
         self.physics_engine = arcade.PhysicsEngineSimple(
@@ -191,14 +181,8 @@ class BattleView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
-        self.player_sprite: arcade.Sprite = None
-        self.enemy_sprite: arcade.Sprite = None
-        self.wall_list: arcade.SpriteList = None
-        self.player_list: arcade.SpriteList = None
-        self.enemy_list: arcade.SpriteList = None
-        self.setup()
 
-    def setup(self) -> None:
+        self.wall_list: arcade.SpriteList = None
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
 
@@ -252,5 +236,5 @@ class BattleView(arcade.View):
 
 
 def main() -> None:
-    GameWindow(geography.Geography())
+    GameWindow()
     arcade.run()  # type: ignore
