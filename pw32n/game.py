@@ -6,12 +6,6 @@ from pyglet.math import Vec2  # type: ignore
 from pw32n import geography, sprite_images, player_model
 
 SCREEN_TITLE = "pyweek32-neverending"
-PLAYER_MOVEMENT_SPEED = 5
-BATTLE_VIEW_GROUND_HEIGHT = 64
-BATTLE_VIEW_SIDE_MARGIN = 128
-
-# How fast the camera pans to the player. 1.0 is instant.
-CAMERA_SPEED = 1.0
 
 
 class GameWindow(arcade.Window):
@@ -33,6 +27,11 @@ class GameWindow(arcade.Window):
 
 
 class WorldView(arcade.View):
+    PLAYER_MOVEMENT_SPEED = 5
+
+    # How fast the camera pans to the player. 1.0 is instant.
+    CAMERA_SPEED = 1.0
+
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
@@ -98,13 +97,13 @@ class WorldView(arcade.View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
-            self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_y = self.PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.DOWN:
-            self.player_sprite.change_y = -PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_y = -self.PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.LEFT:
-            self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_x = -self.PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.RIGHT:
-            self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+            self.player_sprite.change_x = self.PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.ESCAPE:
             self.window.show_view(BattleView())
 
@@ -150,7 +149,7 @@ class WorldView(arcade.View):
             self.player_sprite.center_x - self.window.width // 2,
             self.player_sprite.center_y - self.window.height // 2,
         )
-        self.camera_sprites.move_to(position, CAMERA_SPEED)
+        self.camera_sprites.move_to(position, self.CAMERA_SPEED)
 
     def update_tiles(self) -> None:
         """Add and remove tiles as the user "moves" around."""
@@ -183,6 +182,8 @@ class WorldView(arcade.View):
 
 
 class BattleView(arcade.View):
+    SIDE_MARGIN = 128
+
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
@@ -217,10 +218,10 @@ class BattleView(arcade.View):
             wall.bottom = 0
             self.wall_list.append(wall)
 
-        self.player_sprite.left = BATTLE_VIEW_SIDE_MARGIN
-        self.player_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
-        self.enemy_sprite.right = self.window.width - BATTLE_VIEW_SIDE_MARGIN
-        self.enemy_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
+        self.player_sprite.left = self.SIDE_MARGIN
+        self.player_sprite.bottom = self.geo.tile_height
+        self.enemy_sprite.right = self.window.width - self.SIDE_MARGIN
+        self.enemy_sprite.bottom = self.geo.tile_height
 
     def on_show(self) -> None:
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
