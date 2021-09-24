@@ -156,8 +156,6 @@ class WorldView(arcade.View):
             self.player_sprite.change_x = -self.PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = self.PLAYER_MOVEMENT_SPEED
-        elif symbol == arcade.key.ESCAPE:
-            self.window.show_view(BattleView())
 
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP or symbol == arcade.key.DOWN:
