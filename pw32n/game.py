@@ -302,5 +302,8 @@ class BattleView(arcade.View):
 
 
 def main() -> None:
-    GameWindow()
-    arcade.run()  # type: ignore
+    try:
+        GameWindow()
+        arcade.run()  # type: ignore
+    except KeyboardInterrupt:
+        pass
