@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, sprite_images, player_model, tiles
+from pw32n import geography, sprite_images, player_model, tiles, enemy_sprites
 
 SCREEN_TITLE = "pyweek32-neverending"
 
@@ -40,12 +40,17 @@ class WorldView(arcade.View):
         self.geo = self.window.geo
         self.sprite_map: dict[geography.OriginPoint, arcade.Sprite] = {}
         self.player_list = arcade.SpriteList()
+        self.enemy_sprite_list = arcade.SpriteList()
         self.walkable_tiles_sprite_list = arcade.SpriteList()
         self.unwalkable_tiles_sprite_list = arcade.SpriteList()
-        self.tile_sprite_lists: list[arcade.SpriteList] = [
+
+        # These contain all of the sprites that need to shift when the player moves.
+        self.world_sprite_lists: list[arcade.SpriteList] = [
             self.walkable_tiles_sprite_list,
             self.unwalkable_tiles_sprite_list,
+            self.enemy_sprite_list,
         ]
+
         self.player_sprite = arcade.Sprite(
             sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
         )
@@ -70,26 +75,34 @@ class WorldView(arcade.View):
     def get_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
         tile: tiles.Tile = self.geo.tile_map.get(tile_point)
         if tile is None:
-            tile = self._pick_new_tile(tile_point)
+            tile = self.pick_new_tile(tile_point)
             self.geo.tile_map.put(tile_point, tile)
         return tile
 
-    def _pick_new_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
-        surrounding_tiles = self._get_surrounding_tiles(tile_point)
+    def pick_new_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
+        surrounding_tiles = self.get_surrounding_tiles(tile_point)
 
         # About 80% of the time, just do the same as one of the neighboring tiles unless there
         # aren't any. This makes the blocks "clumpier".
         if surrounding_tiles and random.randrange(100) < 80:
-            return random.choice(surrounding_tiles)
+            tile = random.choice(surrounding_tiles)
 
         # Otherwise, there's a 1 in 6 chance of picking a box crate.
-        if random.randrange(6) == 0:
-            return tiles.BOX_CRATE_TILE
+        elif random.randrange(6) == 0:
+            tile = tiles.BOX_CRATE_TILE
 
         # Otherwise, pick grass.
-        return tiles.GRASS_TILE
+        else:
+            tile = tiles.GRASS_TILE
 
-    def _get_surrounding_tiles(
+        # Whenever we're picking a new tile, and we pick grass, that's a good time to possibly
+        # put a new enemy on that tile.
+        if tile == tiles.GRASS_TILE:
+            self.possibly_create_an_enemy(tile_point)
+
+        return tile
+
+    def get_surrounding_tiles(
         self, tile_point: geography.OriginPoint
     ) -> list[tiles.Tile]:
         surrounding_points = self.geo.surrounding_points(tile_point)
@@ -100,11 +113,20 @@ class WorldView(arcade.View):
                 surrounding_tiles.append(tile)
         return surrounding_tiles
 
+    def possibly_create_an_enemy(self, op: geography.OriginPoint) -> None:
+        if random.randrange(150) != 0:
+            return
+        enemy = enemy_sprites.EnemySprite(sprite_images.SLIME_IMAGE)
+        ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(op)
+        enemy.left = ap.x
+        enemy.top = ap.y
+        self.enemy_sprite_list.append(enemy)
+
     def on_draw(self) -> None:
         arcade.start_render()
 
         self.camera_sprites.use()  # type: ignore
-        for i in self.tile_sprite_lists:
+        for i in self.world_sprite_lists:
             i.draw()
         self.player_list.draw()
 
@@ -163,14 +185,10 @@ class WorldView(arcade.View):
         # world in the *opposite* direction.
         self.player_sprite.center_x = 0
         self.player_sprite.center_y = 0
-        for i in self.tile_sprite_lists:
+        for i in self.world_sprite_lists:
             i.move(-delta_x, -delta_y)
 
         self.update_tiles()
-
-        for i in self.tile_sprite_lists:
-            i.draw()
-        self.player_list.draw()
 
         # Move the camera so that the player is in the middle of the screen. This should only be
         # necessary the first time around or when the window resizes, but it probably doesn't
@@ -223,14 +241,14 @@ class BattleView(arcade.View):
         self.enemy_list = arcade.SpriteList()
 
         self.player_sprite = arcade.Sprite(
-            sprite_images.PLAYER_SIDE_VIEW_IMAGE.filename,
-            scale=sprite_images.PLAYER_SIDE_VIEW_IMAGE.scaling,
+            sprite_images.PLAYER_BATTLE_VIEW_IMAGE.filename,
+            scale=sprite_images.PLAYER_BATTLE_VIEW_IMAGE.scaling,
         )
         self.player_list.append(self.player_sprite)
 
         self.enemy_sprite = arcade.Sprite(
-            sprite_images.SLIME_SIDE_VIEW_IMAGE.filename,
-            scale=sprite_images.PLAYER_SIDE_VIEW_IMAGE.scaling,
+            sprite_images.SLIME_BATTLE_VIEW_IMAGE.filename,
+            scale=sprite_images.PLAYER_BATTLE_VIEW_IMAGE.scaling,
         )
         self.enemy_list.append(self.enemy_sprite)
 
