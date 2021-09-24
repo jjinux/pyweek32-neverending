@@ -30,6 +30,7 @@ class GameWindow(arcade.Window):
     def on_resize(self, width: float, height: float) -> None:
         width = int(width)
         height = int(height)
+        super().on_resize(width, height)
         self.geo.screen_width = width
         self.geo.screen_height = height
 
@@ -188,6 +189,7 @@ class MainView(arcade.View):
                 raise ValueError(f"Unexpected tile: {tile}")
 
     def on_resize(self, width: float, height: float) -> None:
+        # There is no superclass method, but this method definitely gets called.
         width = int(width)
         height = int(height)
         self.camera_sprites.resize(width, height)
@@ -198,15 +200,33 @@ class BattleView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
+        self.player_sprite: arcade.Sprite = None
+        self.enemy_sprite: arcade.Sprite = None
         self.wall_list: arcade.SpriteList = None
         self.player_list: arcade.SpriteList = None
         self.enemy_list: arcade.SpriteList = None
 
     def setup(self) -> None:
-        self.wall_list = arcade.SpriteList()
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
 
+        self.player_sprite = arcade.Sprite(
+            tiles.PLAYER_SIDE_VIEW_TILE.filename,
+            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+        )
+        self.player_list.append(self.player_sprite)
+
+        self.enemy_sprite = arcade.Sprite(
+            tiles.SLIME_SIDE_VIEW_TILE.filename,
+            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+        )
+        self.enemy_list.append(self.enemy_sprite)
+
+        self.update_layout()
+
+    def update_layout(self) -> None:
+        # Just throw away the wall_list and start over.
+        self.wall_list = arcade.SpriteList()
         for x in range(0, self.window.width, self.geo.tile_width):
             wall = arcade.Sprite(
                 tiles.GRASS_SIDE_VIEW_TILE.filename, tiles.GRASS_SIDE_VIEW_TILE.scaling
@@ -215,21 +235,10 @@ class BattleView(arcade.View):
             wall.bottom = 0
             self.wall_list.append(wall)
 
-        self.player_sprite = arcade.Sprite(
-            tiles.PLAYER_SIDE_VIEW_TILE.filename,
-            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
-        )
         self.player_sprite.left = BATTLE_VIEW_SIDE_MARGIN
         self.player_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
-        self.player_list.append(self.player_sprite)
-
-        enemy_sprite = arcade.Sprite(
-            tiles.SLIME_SIDE_VIEW_TILE.filename,
-            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
-        )
-        enemy_sprite.right = self.window.width - BATTLE_VIEW_SIDE_MARGIN
-        enemy_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
-        self.enemy_list.append(enemy_sprite)
+        self.enemy_sprite.right = self.window.width - BATTLE_VIEW_SIDE_MARGIN
+        self.enemy_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
 
     def on_show(self) -> None:
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
@@ -245,6 +254,10 @@ class BattleView(arcade.View):
             main_view = MainView()
             main_view.setup()
             self.window.show_view(main_view)
+
+    def on_resize(self, width: float, height: float) -> None:
+        # There is no superclass method, but this method definitely gets called.
+        self.update_layout()
 
 
 def main() -> None:
