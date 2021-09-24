@@ -70,12 +70,35 @@ class WorldView(arcade.View):
     def get_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
         tile: tiles.Tile = self.geo.tile_map.get(tile_point)
         if tile is None:
-            if random.randrange(5) == 0:
-                tile = tiles.BOX_CRATE_TILE
-            else:
-                tile = tiles.GRASS_TILE
+            tile = self._pick_new_tile(tile_point)
             self.geo.tile_map.put(tile_point, tile)
         return tile
+
+    def _pick_new_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
+        surrounding_tiles = self._get_surrounding_tiles(tile_point)
+
+        # About 80% of the time, just do the same as one of the neighboring tiles unless there
+        # aren't any. This makes the blocks "clumpier".
+        if surrounding_tiles and random.randrange(100) < 80:
+            return random.choice(surrounding_tiles)
+
+        # Otherwise, there's a 1 in 6 chance of picking a box crate.
+        if random.randrange(6) == 0:
+            return tiles.BOX_CRATE_TILE
+
+        # Otherwise, pick grass.
+        return tiles.GRASS_TILE
+
+    def _get_surrounding_tiles(
+        self, tile_point: geography.OriginPoint
+    ) -> list[tiles.Tile]:
+        surrounding_points = self.geo.surrounding_points(tile_point)
+        surrounding_tiles = []
+        for p in surrounding_points:
+            tile = self.geo.tile_map.get(tile_point)
+            if tile is not None:
+                surrounding_tiles.append(tile)
+        return surrounding_tiles
 
     def on_draw(self) -> None:
         arcade.start_render()
