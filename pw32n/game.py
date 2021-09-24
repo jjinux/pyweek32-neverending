@@ -29,6 +29,9 @@ class GameWindow(arcade.Window):
 class WorldView(arcade.View):
     PLAYER_MOVEMENT_SPEED = 5
 
+    # This matches the grassy tile.
+    BACKGROUND_COLOR = (57, 194, 114)
+
     # How fast the camera pans to the player. 1.0 is instant.
     CAMERA_SPEED = 1.0
 
@@ -62,7 +65,7 @@ class WorldView(arcade.View):
         )
 
     def on_show(self) -> None:
-        arcade.set_background_color(arcade.color.AMAZON)
+        arcade.set_background_color(self.BACKGROUND_COLOR)
 
     def pick_tile(self) -> sprite_images.SpriteImage:
         if random.randrange(5) == 0:
