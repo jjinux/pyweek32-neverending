@@ -127,3 +127,30 @@ class Geography(Generic[TileType]):
             op.x - self.position.x,
             op.y - self.position.y,
         )
+
+    def north(self, op: OriginPoint) -> OriginPoint:
+        return OriginPoint(op.x, op.y + self.tile_height)
+
+    def south(self, op: OriginPoint) -> OriginPoint:
+        return OriginPoint(op.x, op.y - self.tile_height)
+
+    def east(self, op: OriginPoint) -> OriginPoint:
+        return OriginPoint(op.x + self.tile_width, op.y)
+
+    def west(self, op: OriginPoint) -> OriginPoint:
+        return OriginPoint(op.x - self.tile_width, op.y)
+
+    def surrounding_points(self, op: OriginPoint) -> list[OriginPoint]:
+        """Return the 8 OriginPoints surrounding the given OriginPoint."""
+        north = self.north(op)
+        south = self.south(op)
+        return [
+            self.west(north),
+            north,
+            self.east(north),
+            self.west(op),
+            self.east(op),
+            self.west(south),
+            south,
+            self.east(south),
+        ]
