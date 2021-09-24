@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geometry, tiles
+from pw32n import geography, tiles
 
 SCREEN_TITLE = "pyweek32-neverending"
 PLAYER_MOVEMENT_SPEED = 5
@@ -15,7 +15,7 @@ CAMERA_SPEED = 1.0
 
 
 class GameWindow(arcade.Window):
-    def __init__(self, geo: geometry.Geometry) -> None:
+    def __init__(self, geo: geography.Geography) -> None:
         super().__init__(
             geo.screen_width, geo.screen_height, SCREEN_TITLE, resizable=True
         )
@@ -38,7 +38,7 @@ class WorldView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
-        self.spriteMap: dict[geometry.OriginPoint, arcade.Sprite] = None
+        self.spriteMap: dict[geography.OriginPoint, arcade.Sprite] = None
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
         self.wall_list: arcade.SpriteList = None
@@ -133,7 +133,7 @@ class WorldView(arcade.View):
         delta_x = round(self.player_sprite.center_x - prev_player_sprite_center_x)
         delta_y = round(self.player_sprite.center_y - prev_player_sprite_center_y)
 
-        self.geo.position = geometry.OriginPoint(
+        self.geo.position = geography.OriginPoint(
             self.geo.position.x + delta_x, self.geo.position.y + delta_y
         )
 
@@ -254,5 +254,5 @@ class BattleView(arcade.View):
 
 
 def main() -> None:
-    GameWindow(geometry.Geometry())
+    GameWindow(geography.Geography())
     arcade.run()  # type: ignore

@@ -28,9 +28,9 @@ class TilePointDiff(NamedTuple):
     removed: set[OriginPoint]
 
 
-class Geometry:
+class Geography:
 
-    """This class wraps up a bunch of "context" about the game's geometry."""
+    """Geography literally means measuring the world. That's what this class does."""
 
     def __init__(self) -> None:
         self.tile_width: AdventureDistance = 64
