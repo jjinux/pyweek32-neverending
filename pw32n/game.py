@@ -52,7 +52,8 @@ class WorldView(arcade.View):
         ]
 
         self.player_sprite = arcade.Sprite(
-            sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
+            sprite_images.PLAYER_IMAGE.filename,
+            scale=(self.geo.tile_width / sprite_images.PLAYER_IMAGE.width),
         )
 
         # Even though we show the player in the middle of the screen, he really lives at the
@@ -120,7 +121,11 @@ class WorldView(arcade.View):
             return
         enemy_strength = models.pick_enemy_strength(op)
         enemy_model = models.EnemyModel(enemy_strength)
-        enemy = enemy_sprites.EnemySprite(sprite_images.ZOMBIE_IMAGE, enemy_model)
+        enemy = enemy_sprites.EnemySprite(
+            enemy_model,
+            sprite_images.ZOMBIE_IMAGE.filename,
+            scale=(self.geo.tile_width / sprite_images.ZOMBIE_IMAGE.width),
+        )
         ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(op)
         enemy.left = ap.x
         enemy.top = ap.y
@@ -221,7 +226,8 @@ class WorldView(arcade.View):
         for tile_point in tile_point_diff.added:
             tile = self.get_tile(tile_point)
             sprite = arcade.Sprite(
-                tile.sprite_image.filename, tile.sprite_image.scaling
+                tile.sprite_image.filename,
+                scale=(self.geo.tile_width / tile.sprite_image.width),
             )
             self.sprite_map[tile_point] = sprite
             tile_adventure_point = self.geo.origin_point_to_adventure_point(tile_point)
@@ -241,7 +247,8 @@ class WorldView(arcade.View):
 
 
 class BattleView(arcade.View):
-    SIDE_MARGIN = 128
+    PLAYER_WIDTH = 128
+    SIDE_MARGIN = PLAYER_WIDTH
 
     def __init__(self, enemy_model: models.EnemyModel) -> None:
         super().__init__()
@@ -253,14 +260,14 @@ class BattleView(arcade.View):
         self.enemy_list = arcade.SpriteList()
 
         self.player_sprite = arcade.Sprite(
-            sprite_images.PLAYER_BATTLE_VIEW_IMAGE.filename,
-            scale=sprite_images.PLAYER_BATTLE_VIEW_IMAGE.scaling,
+            sprite_images.PLAYER_IMAGE.filename,
+            scale=(self.PLAYER_WIDTH / sprite_images.PLAYER_IMAGE.width),
         )
         self.player_list.append(self.player_sprite)
 
         self.enemy_sprite = arcade.Sprite(
-            sprite_images.ZOMBIE_BATTLE_VIEW_IMAGE.filename,
-            scale=sprite_images.PLAYER_BATTLE_VIEW_IMAGE.scaling,
+            sprite_images.ZOMBIE_IMAGE.filename,
+            scale=(self.PLAYER_WIDTH / sprite_images.PLAYER_IMAGE.width),
         )
         self.enemy_list.append(self.enemy_sprite)
 
@@ -272,7 +279,9 @@ class BattleView(arcade.View):
         for x in range(0, self.window.width, self.geo.tile_width):
             wall = arcade.Sprite(
                 sprite_images.GRASS_SIDE_VIEW_TILE_IMAGE.filename,
-                sprite_images.GRASS_SIDE_VIEW_TILE_IMAGE.scaling,
+                scale=(
+                    self.geo.tile_width / sprite_images.GRASS_SIDE_VIEW_TILE_IMAGE.width
+                ),
             )
             wall.left = x
             wall.bottom = 0
