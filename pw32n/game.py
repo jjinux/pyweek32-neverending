@@ -24,7 +24,7 @@ class GameWindow(arcade.Window):
 
     def setup(self) -> None:
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
-        self.show_view(MainView())
+        self.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:
         width = int(width)
@@ -34,7 +34,7 @@ class GameWindow(arcade.Window):
         self.geo.screen_height = height
 
 
-class MainView(arcade.View):
+class WorldView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
@@ -42,7 +42,7 @@ class MainView(arcade.View):
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
         self.wall_list: arcade.SpriteList = None
-        self.map_lists: list[arcade.SpriteList] = None
+        self.tile_sprite_lists: list[arcade.SpriteList] = None
         self.player_sprite: arcade.Sprite = None
         self.strength = 1.0
         self.physics_engine: arcade.PhysicsEngineSimple = None
@@ -57,7 +57,7 @@ class MainView(arcade.View):
         self.player_list = arcade.SpriteList()
         self.grass_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
-        self.map_lists = [self.grass_list, self.wall_list]
+        self.tile_sprite_lists = [self.grass_list, self.wall_list]
 
         self.player_sprite = arcade.Sprite(
             tiles.PLAYER_TILE.filename, tiles.PLAYER_TILE.scaling
@@ -84,8 +84,8 @@ class MainView(arcade.View):
         arcade.start_render()
 
         self.camera_sprites.use()  # type: ignore
-        for map_list in self.map_lists:
-            map_list.draw()
+        for i in self.tile_sprite_lists:
+            i.draw()
         self.player_list.draw()
 
         self.camera_gui.use()  # type: ignore
@@ -139,16 +139,16 @@ class MainView(arcade.View):
 
         self.strength += (abs(delta_x) + abs(delta_y)) * 0.001
 
-        # Put the player back where he was and instead move the map in the *opposite* direction.
+        # Put the player back where he was and instead move the world in the *opposite* direction.
         self.player_sprite.center_x = self.geo.initial_position.x
         self.player_sprite.center_y = self.geo.initial_position.y
-        for map_list in self.map_lists:
-            map_list.move(-delta_x, -delta_y)
+        for i in self.tile_sprite_lists:
+            i.move(-delta_x, -delta_y)
 
         self.update_tiles()
 
-        for map_list in self.map_lists:
-            map_list.draw()
+        for i in self.tile_sprite_lists:
+            i.draw()
         self.player_list.draw()
 
         # Move the camera so that the player is in the middle. This should only be necessary the
@@ -246,7 +246,7 @@ class BattleView(arcade.View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.ESCAPE:
-            self.window.show_view(MainView())
+            self.window.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.
