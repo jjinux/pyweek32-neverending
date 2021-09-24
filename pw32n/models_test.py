@@ -1,6 +1,7 @@
 import unittest
 
-from pw32n.models import PlayerModel, EnemyModel
+from pw32n.geography import OriginPoint
+from pw32n.models import PlayerModel, EnemyModel, pick_enemy_strength
 
 
 class PlayerModelTestCase(unittest.TestCase):
@@ -28,3 +29,25 @@ class EnemyModelTestCase(unittest.TestCase):
         self.enemy_model.strength -= 100.0
         self.assertEqual(self.enemy_model.strength, 0.0)
         self.assertTrue(self.enemy_model.is_dead)
+
+
+class PickEnemyStrengthTestCase(unittest.TestCase):
+    def test_small_distances(self) -> None:
+        for i in range(3):
+            op = OriginPoint(0, 10)
+            self.assertEqual(pick_enemy_strength(op), 0.1)
+
+    def test_medium_distances(self) -> None:
+        saw_small = False
+        saw_big = False
+        for i in range(100):
+            op = OriginPoint(0, 10_000)
+            strength = pick_enemy_strength(op)
+            if strength < 5.0:
+                saw_small = True
+            if strength >= 5.0:
+                saw_big = True
+            if strength > 10.0:
+                raise AssertionError(f"Unexpectedly large: {strength}")
+            if saw_small and saw_big:
+                break
