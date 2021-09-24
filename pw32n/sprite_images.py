@@ -11,7 +11,13 @@ class SpriteImage(NamedTuple):
 
 PLAYER_IMAGE = SpriteImage(
     ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
-    scaling=0.4,
+    scaling=0.5,
+)
+
+# It's 128x128, and I want 128x128.
+PLAYER_BATTLE_VIEW_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
+    scaling=1.0,
 )
 
 # It's 64x64, and that's what I want.
@@ -29,13 +35,10 @@ GRASS_SIDE_VIEW_TILE_IMAGE = SpriteImage(
     ":resources:images/tiles/grassMid.png", scaling=0.5
 )
 
-# It's 128x128, and I want 128x128.
-PLAYER_SIDE_VIEW_IMAGE = SpriteImage(
-    ":resources:images/animated_characters/female_adventurer/femaleAdventurer_idle.png",
-    scaling=1.0,
-)
+# It's 128x128, and I want 64x64.
+SLIME_IMAGE = SpriteImage(":resources:images/enemies/slimeBlue.png", scaling=0.5)
 
 # It's 128x128, and I want 128x128.
-SLIME_SIDE_VIEW_IMAGE = SpriteImage(
+SLIME_BATTLE_VIEW_IMAGE = SpriteImage(
     ":resources:images/enemies/slimeGreen.png", scaling=1.0
 )
