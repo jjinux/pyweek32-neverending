@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, tiles
+from pw32n import geography, sprite_images
 
 SCREEN_TITLE = "pyweek32-neverending"
 PLAYER_MOVEMENT_SPEED = 5
@@ -60,7 +60,7 @@ class WorldView(arcade.View):
         self.tile_sprite_lists = [self.grass_list, self.wall_list]
 
         self.player_sprite = arcade.Sprite(
-            tiles.PLAYER_TILE.filename, tiles.PLAYER_TILE.scaling
+            sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
         )
         self.player_sprite.center_x = self.geo.initial_position.x
         self.player_sprite.center_y = self.geo.initial_position.y
@@ -74,11 +74,11 @@ class WorldView(arcade.View):
     def on_show(self) -> None:
         arcade.set_background_color(arcade.color.AMAZON)
 
-    def pick_tile(self) -> tiles.TileDetails:
+    def pick_tile(self) -> sprite_images.SpriteImage:
         if random.randrange(5) == 0:
-            return tiles.BOX_CRATE_TILE
+            return sprite_images.BOX_CRATE_TILE_IMAGE
         else:
-            return tiles.GRASS_TILE
+            return sprite_images.GRASS_TILE_IMAGE
 
     def on_draw(self) -> None:
         arcade.start_render()
@@ -175,9 +175,9 @@ class WorldView(arcade.View):
             tile_adventure_point = self.geo.origin_point_to_adventure_point(tile_point)
             sprite.left = tile_adventure_point.x
             sprite.top = tile_adventure_point.y
-            if tile == tiles.GRASS_TILE:
+            if tile == sprite_images.GRASS_TILE_IMAGE:
                 self.grass_list.append(sprite)
-            elif tile == tiles.BOX_CRATE_TILE:
+            elif tile == sprite_images.BOX_CRATE_TILE_IMAGE:
                 self.wall_list.append(sprite)
             else:
                 raise ValueError(f"Unexpected tile: {tile}")
@@ -206,14 +206,14 @@ class BattleView(arcade.View):
         self.enemy_list = arcade.SpriteList()
 
         self.player_sprite = arcade.Sprite(
-            tiles.PLAYER_SIDE_VIEW_TILE.filename,
-            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+            sprite_images.PLAYER_SIDE_VIEW_IMAGE.filename,
+            scale=sprite_images.PLAYER_SIDE_VIEW_IMAGE.scaling,
         )
         self.player_list.append(self.player_sprite)
 
         self.enemy_sprite = arcade.Sprite(
-            tiles.SLIME_SIDE_VIEW_TILE.filename,
-            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+            sprite_images.SLIME_SIDE_VIEW_IMAGE.filename,
+            scale=sprite_images.PLAYER_SIDE_VIEW_IMAGE.scaling,
         )
         self.enemy_list.append(self.enemy_sprite)
 
@@ -224,7 +224,8 @@ class BattleView(arcade.View):
         self.wall_list = arcade.SpriteList()
         for x in range(0, self.window.width, self.geo.tile_width):
             wall = arcade.Sprite(
-                tiles.GRASS_SIDE_VIEW_TILE.filename, tiles.GRASS_SIDE_VIEW_TILE.scaling
+                sprite_images.GRASS_SIDE_VIEW_TILE_IMAGE.filename,
+                sprite_images.GRASS_SIDE_VIEW_TILE_IMAGE.scaling,
             )
             wall.left = x
             wall.bottom = 0
