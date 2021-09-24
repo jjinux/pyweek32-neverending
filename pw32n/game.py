@@ -5,63 +5,63 @@ from pyglet.math import Vec2  # type: ignore
 
 from pw32n import geometry, tiles
 
-SCREEN_TITLE = "Sprite Move with Scrolling Screen Example"
+SCREEN_TITLE = "pyweek32-neverending"
+PLAYER_MOVEMENT_SPEED = 5
+BATTLE_VIEW_GROUND_HEIGHT = 64
+BATTLE_VIEW_SIDE_MARGIN = 128
 
 # How fast the camera pans to the player. 1.0 is instant.
 CAMERA_SPEED = 1.0
 
-# How fast the character moves
-PLAYER_MOVEMENT_SPEED = 5
 
-
-class MyGame(arcade.Window):
-    """Main application class."""
-
-    def __init__(self) -> None:
-
-        # I need this first since it has screen_width and screen_height.
-        self.geo = geometry.Geometry()
-
+class GameWindow(arcade.Window):
+    def __init__(self, geo: geometry.Geometry) -> None:
         super().__init__(
-            self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
+            geo.screen_width, geo.screen_height, SCREEN_TITLE, resizable=True
         )
+        self.geo = geo
 
+    def setup(self) -> None:
+        self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
+        main_view = MainView()
+        main_view.setup()
+        self.show_view(main_view)
+
+    def on_resize(self, width: float, height: float) -> None:
+        width = int(width)
+        height = int(height)
+        self.geo.screen_width = width
+        self.geo.screen_height = height
+
+
+class MainView(arcade.View):
+    def __init__(self) -> None:
+        super().__init__()
+        self.geo = self.window.geo
         self.spriteMap: dict[geometry.OriginPoint, arcade.Sprite] = None
 
-        # Sprite lists
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
         self.wall_list: arcade.SpriteList = None
         self.map_lists: list[arcade.SpriteList] = None
 
-        # Set up the player
         self.player_sprite: arcade.Sprite = None
         self.strength = 1.0
 
-        # Physics engine so we don't run into walls.
         self.physics_engine: arcade.PhysicsEngineSimple = None
 
-        # Create the cameras. One for the GUI, one for the sprites.
-        # We scroll the 'sprite world' but not the GUI.
-        self.camera_sprites = arcade.Camera(
-            self.geo.screen_width, self.geo.screen_height
-        )
-        self.camera_gui = arcade.Camera(self.geo.screen_width, self.geo.screen_height)
+        self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
+        self.camera_gui = arcade.Camera(self.window.width, self.window.height)
 
     def setup(self) -> None:
-        """Set up the game and initialize the variables."""
-
-        self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
         self.geo.position = self.geo.initial_position
         self.spriteMap = {}
 
-        # Sprite lists
         self.player_list = arcade.SpriteList()
         self.grass_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.map_lists = [self.grass_list, self.wall_list]
 
-        # Set up the player
         self.player_sprite = arcade.Sprite(
             tiles.PLAYER_TILE.filename, tiles.PLAYER_TILE.scaling
         )
@@ -69,11 +69,12 @@ class MyGame(arcade.Window):
         self.player_sprite.center_y = self.geo.initial_position.y
         self.player_list.append(self.player_sprite)
 
+        # This keeps us from walking through walls.
         self.physics_engine = arcade.PhysicsEngineSimple(
             self.player_sprite, self.wall_list
         )
 
-        # Set the background color
+    def on_show(self) -> None:
         arcade.set_background_color(arcade.color.AMAZON)
 
     def pick_tile(self) -> tiles.TileDetails:
@@ -83,34 +84,31 @@ class MyGame(arcade.Window):
             return tiles.GRASS_TILE
 
     def on_draw(self) -> None:
-        """
-        Render the screen.
-        """
-
-        # This command has to happen before we start drawing
         arcade.start_render()
 
-        # Select the camera we'll use to draw all our sprites
         self.camera_sprites.use()  # type: ignore
-
-        # Draw all the sprites.
         for map_list in self.map_lists:
             map_list.draw()
         self.player_list.draw()
 
-        # Select the (unscrolled) camera for our GUI
         self.camera_gui.use()  # type: ignore
-
-        # Draw the GUI
         arcade.draw_rectangle_filled(
-            self.width // 2, 20, self.width, 40, arcade.color.ALMOND
+            center_x=self.window.width // 2,
+            center_y=20,
+            width=self.window.width,
+            height=40,
+            color=arcade.color.ALMOND,
         )
         text = f"Pos: ({self.geo.position.x}, {self.geo.position.y}) Strength: {self.strength:.1f}"
-        arcade.draw_text(text, 10, 10, arcade.color.BLACK_BEAN, 20)
+        arcade.draw_text(
+            text=text,
+            start_x=10,
+            start_y=10,
+            color=arcade.color.BLACK_BEAN,
+            font_size=20,
+        )
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
-        """Called whenever a key is pressed."""
-
         if symbol == arcade.key.UP:
             self.player_sprite.change_y = PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.DOWN:
@@ -119,23 +117,22 @@ class MyGame(arcade.Window):
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+        elif symbol == arcade.key.ESCAPE:
+            battle_view = BattleView()
+            battle_view.setup()
+            self.window.show_view(battle_view)
 
     def on_key_release(self, symbol: int, modifiers: int) -> None:
-        """Called when the user releases a key."""
-
         if symbol == arcade.key.UP or symbol == arcade.key.DOWN:
             self.player_sprite.change_y = 0
         elif symbol == arcade.key.LEFT or symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = 0
 
     def on_update(self, delta_time: float) -> None:
-        """Movement and game logic"""
-
         prev_player_sprite_center_x = self.player_sprite.center_x
         prev_player_sprite_center_y = self.player_sprite.center_y
 
-        # Call update on all sprites (The sprites don't do much in this
-        # example though.)
+        # This may move the player_sprite.
         self.physics_engine.update()  # type: ignore
 
         delta_x = round(self.player_sprite.center_x - prev_player_sprite_center_x)
@@ -160,10 +157,11 @@ class MyGame(arcade.Window):
         self.player_list.draw()
 
         # Move the camera so that the player is in the middle. This should only be necessary the
-        # first time around or when the window resizes, but it probably doesn't hurt to leave it here.
+        # first time around or when the window resizes, but it probably doesn't hurt to leave it
+        # here.
         position = Vec2(
-            self.player_sprite.center_x - self.width / 2,
-            self.player_sprite.center_y - self.height / 2,
+            self.player_sprite.center_x - self.window.width / 2,
+            self.player_sprite.center_y - self.window.height / 2,
         )
         self.camera_sprites.move_to(position, CAMERA_SPEED)
 
@@ -190,19 +188,67 @@ class MyGame(arcade.Window):
                 raise ValueError(f"Unexpected tile: {tile}")
 
     def on_resize(self, width: float, height: float) -> None:
-        """
-        Resize window
-        Handle the user grabbing the edge and resizing the window.
-        """
         width = int(width)
         height = int(height)
-        self.geo.screen_width = width
-        self.geo.screen_height = height
         self.camera_sprites.resize(width, height)
         self.camera_gui.resize(width, height)
 
 
+class BattleView(arcade.View):
+    def __init__(self) -> None:
+        super().__init__()
+        self.geo = self.window.geo
+        self.wall_list: arcade.SpriteList = None
+        self.player_list: arcade.SpriteList = None
+        self.enemy_list: arcade.SpriteList = None
+
+    def setup(self) -> None:
+        self.wall_list = arcade.SpriteList()
+        self.player_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
+
+        for x in range(0, self.window.width, self.geo.tile_width):
+            wall = arcade.Sprite(
+                tiles.GRASS_SIDE_VIEW_TILE.filename, tiles.GRASS_SIDE_VIEW_TILE.scaling
+            )
+            wall.left = x
+            wall.bottom = 0
+            self.wall_list.append(wall)
+
+        self.player_sprite = arcade.Sprite(
+            tiles.PLAYER_SIDE_VIEW_TILE.filename,
+            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+        )
+        self.player_sprite.left = BATTLE_VIEW_SIDE_MARGIN
+        self.player_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
+        self.player_list.append(self.player_sprite)
+
+        enemy_sprite = arcade.Sprite(
+            tiles.SLIME_SIDE_VIEW_TILE.filename,
+            scale=tiles.PLAYER_SIDE_VIEW_TILE.scaling,
+        )
+        enemy_sprite.right = self.window.width - BATTLE_VIEW_SIDE_MARGIN
+        enemy_sprite.bottom = BATTLE_VIEW_GROUND_HEIGHT
+        self.enemy_list.append(enemy_sprite)
+
+    def on_show(self) -> None:
+        arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
+
+    def on_draw(self) -> None:
+        arcade.start_render()
+        self.wall_list.draw()
+        self.player_list.draw()
+        self.enemy_list.draw()
+
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
+        if symbol == arcade.key.ESCAPE:
+            main_view = MainView()
+            main_view.setup()
+            self.window.show_view(main_view)
+
+
 def main() -> None:
-    window = MyGame()
+    geo = geometry.Geometry()
+    window = GameWindow(geo)
     window.setup()
     arcade.run()  # type: ignore
