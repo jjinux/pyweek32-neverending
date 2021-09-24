@@ -20,12 +20,11 @@ class GameWindow(arcade.Window):
             geo.screen_width, geo.screen_height, SCREEN_TITLE, resizable=True
         )
         self.geo = geo
+        self.setup()
 
     def setup(self) -> None:
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
-        main_view = MainView()
-        main_view.setup()
-        self.show_view(main_view)
+        self.show_view(MainView())
 
     def on_resize(self, width: float, height: float) -> None:
         width = int(width)
@@ -40,19 +39,16 @@ class MainView(arcade.View):
         super().__init__()
         self.geo = self.window.geo
         self.spriteMap: dict[geometry.OriginPoint, arcade.Sprite] = None
-
         self.player_list: arcade.SpriteList = None
         self.grass_list: arcade.SpriteList = None
         self.wall_list: arcade.SpriteList = None
         self.map_lists: list[arcade.SpriteList] = None
-
         self.player_sprite: arcade.Sprite = None
         self.strength = 1.0
-
         self.physics_engine: arcade.PhysicsEngineSimple = None
-
         self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
         self.camera_gui = arcade.Camera(self.window.width, self.window.height)
+        self.setup()
 
     def setup(self) -> None:
         self.geo.position = self.geo.initial_position
@@ -119,9 +115,7 @@ class MainView(arcade.View):
         elif symbol == arcade.key.RIGHT:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
         elif symbol == arcade.key.ESCAPE:
-            battle_view = BattleView()
-            battle_view.setup()
-            self.window.show_view(battle_view)
+            self.window.show_view(BattleView())
 
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP or symbol == arcade.key.DOWN:
@@ -205,6 +199,7 @@ class BattleView(arcade.View):
         self.wall_list: arcade.SpriteList = None
         self.player_list: arcade.SpriteList = None
         self.enemy_list: arcade.SpriteList = None
+        self.setup()
 
     def setup(self) -> None:
         self.player_list = arcade.SpriteList()
@@ -251,9 +246,7 @@ class BattleView(arcade.View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.ESCAPE:
-            main_view = MainView()
-            main_view.setup()
-            self.window.show_view(main_view)
+            self.window.show_view(MainView())
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.
@@ -261,7 +254,5 @@ class BattleView(arcade.View):
 
 
 def main() -> None:
-    geo = geometry.Geometry()
-    window = GameWindow(geo)
-    window.setup()
+    GameWindow(geometry.Geometry())
     arcade.run()  # type: ignore
