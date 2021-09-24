@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, sprite_images
+from pw32n import geography, sprite_images, player_model
 
 SCREEN_TITLE = "pyweek32-neverending"
 PLAYER_MOVEMENT_SPEED = 5
@@ -20,9 +20,7 @@ class GameWindow(arcade.Window):
             geo.screen_width, geo.screen_height, SCREEN_TITLE, resizable=True
         )
         self.geo = geo
-        self.setup()
-
-    def setup(self) -> None:
+        self.player_model = player_model.PlayerModel()
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
         self.show_view(WorldView())
 
@@ -44,7 +42,6 @@ class WorldView(arcade.View):
         self.wall_list: arcade.SpriteList = None
         self.tile_sprite_lists: list[arcade.SpriteList] = None
         self.player_sprite: arcade.Sprite = None
-        self.strength = 1.0
         self.physics_engine: arcade.PhysicsEngineSimple = None
         self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
         self.camera_gui = arcade.Camera(self.window.width, self.window.height)
@@ -96,7 +93,7 @@ class WorldView(arcade.View):
             height=40,
             color=arcade.color.ALMOND,
         )
-        text = f"Pos: ({self.geo.position.x}, {self.geo.position.y}) Strength: {self.strength:.1f}"
+        text = f"Pos: ({self.geo.position.x}, {self.geo.position.y}) Strength: {self.window.player_model.strength:.1f}"
         arcade.draw_text(
             text=text,
             start_x=10,
@@ -137,7 +134,7 @@ class WorldView(arcade.View):
             self.geo.position.x + delta_x, self.geo.position.y + delta_y
         )
 
-        self.strength += (abs(delta_x) + abs(delta_y)) * 0.001
+        self.window.player_model.strength += (abs(delta_x) + abs(delta_y)) * 0.001
 
         # Put the player back where he was and instead move the world in the *opposite* direction.
         self.player_sprite.center_x = self.geo.initial_position.x
