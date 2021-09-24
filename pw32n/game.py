@@ -3,14 +3,14 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, sprite_images, player_model
+from pw32n import geography, sprite_images, player_model, tiles
 
 SCREEN_TITLE = "pyweek32-neverending"
 
 
 class GameWindow(arcade.Window):
     def __init__(self) -> None:
-        self.geo = geography.Geography()
+        self.geo: geography.Geography[tiles.Tile] = geography.Geography()
         super().__init__(
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
@@ -38,7 +38,7 @@ class WorldView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
         self.geo = self.window.geo
-        self.spriteMap: dict[geography.OriginPoint, arcade.Sprite] = {}
+        self.sprite_map: dict[geography.OriginPoint, arcade.Sprite] = {}
         self.player_list = arcade.SpriteList()
         self.grass_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
@@ -156,16 +156,16 @@ class WorldView(arcade.View):
 
     def update_tiles(self) -> None:
         """Add and remove tiles as the user "moves" around."""
-        prev_tile_points = set(self.spriteMap.keys())
+        prev_tile_points = set(self.sprite_map.keys())
         new_tile_points = set(self.geo.generate_tile_points())
         tile_point_diff = self.geo.diff_tile_points(prev_tile_points, new_tile_points)
         for tile_point in tile_point_diff.removed:
-            sprite = self.spriteMap.pop(tile_point)
+            sprite = self.sprite_map.pop(tile_point)
             sprite.kill()  # type: ignore
         for tile_point in tile_point_diff.added:
             tile = self.pick_tile()
             sprite = arcade.Sprite(tile.filename, tile.scaling)
-            self.spriteMap[tile_point] = sprite
+            self.sprite_map[tile_point] = sprite
             tile_adventure_point = self.geo.origin_point_to_adventure_point(tile_point)
             sprite.left = tile_adventure_point.x
             sprite.top = tile_adventure_point.y

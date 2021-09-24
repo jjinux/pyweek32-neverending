@@ -1,9 +1,10 @@
+from typing import NamedTuple
 import unittest
 
 from pw32n import geography
 
 
-class SmallGeography(geography.Geography):
+class SmallGeography(geography.Geography[geography.TileType]):
 
     """It's easier to understand things if you use smaller numbers."""
 
@@ -18,9 +19,13 @@ class SmallGeography(geography.Geography):
         self.position = geography.OriginPoint(20, 20)
 
 
+class ExampleTile(NamedTuple):
+    pass
+
+
 class GeographyTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.geo = SmallGeography()
+        self.geo: geography.Geography[ExampleTile] = SmallGeography()
 
     def test_adventure_point(self) -> None:
         self.assertTrue(geography.AdventurePoint(1, 2))
@@ -108,3 +113,9 @@ class GeographyTestCase(unittest.TestCase):
         )
         expected_ap = geography.AdventurePoint(1, 1)
         self.assertEqual(self.geo.origin_point_to_adventure_point(op), expected_ap)
+
+    def test_it_has_a_working_tile_map(self) -> None:
+        p = geography.OriginPoint(0, 0)
+        tile = ExampleTile()
+        self.geo.tile_map.put(p, tile)
+        self.assertEqual(self.geo.tile_map.get(p), tile)
