@@ -113,15 +113,6 @@ class Geometry:
             removed=(prev_tile_points - new_tile_points),
         )
 
-    def center_of_screen_x(self) -> AdventureDistance:
-        return self.screen_width // 2
-
-    def center_of_screen_y(self) -> AdventureDistance:
-        return self.screen_height // 2
-
-    def center_of_screen(self) -> AdventurePoint:
-        return AdventurePoint(self.center_of_screen_x(), self.center_of_screen_y())
-
     def origin_point_to_adventure_point(self, op: OriginPoint) -> AdventurePoint:
         return AdventurePoint(
             op.x - self.position.x,

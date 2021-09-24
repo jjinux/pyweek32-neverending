@@ -100,17 +100,7 @@ class GeometryTestCase(unittest.TestCase):
         self.assertSetEqual(diff.removed, {p0})
         self.assertEqual(diff.added, {p2})
 
-    def test_center_of_screen_x(self) -> None:
-        self.assertEqual(self.geo.center_of_screen_x(), 50)
-
-    def test_center_of_screen_y(self) -> None:
-        self.assertEqual(self.geo.center_of_screen_y(), 40)
-
-    def test_center_of_screen(self) -> None:
-        self.assertEqual(self.geo.center_of_screen(), geometry.AdventurePoint(50, 40))
-
     def test_origin_point_to_adventure_point(self) -> None:
-        center = self.geo.center_of_screen()
         op = geometry.OriginPoint(
             self.geo.position.x + 1,
             self.geo.position.y + 1,

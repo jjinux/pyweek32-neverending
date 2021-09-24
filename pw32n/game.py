@@ -155,8 +155,8 @@ class MainView(arcade.View):
         # first time around or when the window resizes, but it probably doesn't hurt to leave it
         # here.
         position = Vec2(
-            self.player_sprite.center_x - self.window.width / 2,
-            self.player_sprite.center_y - self.window.height / 2,
+            self.player_sprite.center_x - self.window.width // 2,
+            self.player_sprite.center_y - self.window.height // 2,
         )
         self.camera_sprites.move_to(position, CAMERA_SPEED)
 
