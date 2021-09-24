@@ -199,6 +199,14 @@ class WorldView(arcade.View):
         )
         self.camera_sprites.move_to(position, self.CAMERA_SPEED)
 
+        # Now that we've sort of left everything in a good state, if we hit an enemy, we should
+        # switch to BattleView.
+        enemy_hit_list = arcade.check_for_collision_with_list(
+            self.player_sprite, self.enemy_sprite_list
+        )
+        if enemy_hit_list:
+            self.window.show_view(BattleView())
+
     def update_tiles(self) -> None:
         """Add and remove tiles as the user "moves" around."""
         prev_tile_points = set(self.sprite_map.keys())
