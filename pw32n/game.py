@@ -302,7 +302,9 @@ class BattleView(arcade.View):
         self.enemy_list.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
+        # For now, hitting escape just kills the enemy.
         if symbol == arcade.key.ESCAPE:
+            self.enemy_model.strength = 0.0
             self.window.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:
