@@ -47,8 +47,12 @@ class WorldView(arcade.View):
         self.player_sprite = arcade.Sprite(
             sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
         )
+
+        # Even though we show the player in the middle of the screen, he really lives at the
+        # center of the universe, and we move the camera to compensate.
         self.player_sprite.center_x = 0
         self.player_sprite.center_y = 0
+
         self.player_list.append(self.player_sprite)
         self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
         self.camera_gui = arcade.Camera(self.window.width, self.window.height)
@@ -126,9 +130,10 @@ class WorldView(arcade.View):
 
         self.window.player_model.strength += (abs(delta_x) + abs(delta_y)) * 0.001
 
-        # Put the player back where he was and instead move the world in the *opposite* direction.
-        self.player_sprite.center_x = self.geo.initial_position.x
-        self.player_sprite.center_y = self.geo.initial_position.y
+        # Put the player back where he was (at the center of the universe) and instead move the
+        # world in the *opposite* direction.
+        self.player_sprite.center_x = 0
+        self.player_sprite.center_y = 0
         for i in self.tile_sprite_lists:
             i.move(-delta_x, -delta_y)
 
@@ -138,9 +143,9 @@ class WorldView(arcade.View):
             i.draw()
         self.player_list.draw()
 
-        # Move the camera so that the player is in the middle. This should only be necessary the
-        # first time around or when the window resizes, but it probably doesn't hurt to leave it
-        # here.
+        # Move the camera so that the player is in the middle of the screen. This should only be
+        # necessary the first time around or when the window resizes, but it probably doesn't
+        # hurt to leave it here.
         position = Vec2(
             self.player_sprite.center_x - self.window.width // 2,
             self.player_sprite.center_y - self.window.height // 2,
