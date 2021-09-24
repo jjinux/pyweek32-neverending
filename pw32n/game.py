@@ -40,11 +40,11 @@ class WorldView(arcade.View):
         self.geo = self.window.geo
         self.sprite_map: dict[geography.OriginPoint, arcade.Sprite] = {}
         self.player_list = arcade.SpriteList()
-        self.grass_list = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList()
+        self.walkable_tiles_sprite_list = arcade.SpriteList()
+        self.unwalkable_tiles_sprite_list = arcade.SpriteList()
         self.tile_sprite_lists: list[arcade.SpriteList] = [
-            self.grass_list,
-            self.wall_list,
+            self.walkable_tiles_sprite_list,
+            self.unwalkable_tiles_sprite_list,
         ]
         self.player_sprite = arcade.Sprite(
             sprite_images.PLAYER_IMAGE.filename, sprite_images.PLAYER_IMAGE.scaling
@@ -61,17 +61,21 @@ class WorldView(arcade.View):
 
         # This keeps us from walking through walls.
         self.physics_engine = arcade.PhysicsEngineSimple(
-            self.player_sprite, self.wall_list
+            self.player_sprite, self.unwalkable_tiles_sprite_list
         )
 
     def on_show(self) -> None:
         arcade.set_background_color(self.BACKGROUND_COLOR)
 
-    def pick_tile(self) -> sprite_images.SpriteImage:
-        if random.randrange(5) == 0:
-            return sprite_images.BOX_CRATE_TILE_IMAGE
-        else:
-            return sprite_images.GRASS_TILE_IMAGE
+    def get_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
+        tile: tiles.Tile = self.geo.tile_map.get(tile_point)
+        if tile is None:
+            if random.randrange(5) == 0:
+                tile = tiles.BOX_CRATE_TILE
+            else:
+                tile = tiles.GRASS_TILE
+            self.geo.tile_map.put(tile_point, tile)
+        return tile
 
     def on_draw(self) -> None:
         arcade.start_render()
@@ -163,18 +167,18 @@ class WorldView(arcade.View):
             sprite = self.sprite_map.pop(tile_point)
             sprite.kill()  # type: ignore
         for tile_point in tile_point_diff.added:
-            tile = self.pick_tile()
-            sprite = arcade.Sprite(tile.filename, tile.scaling)
+            tile = self.get_tile(tile_point)
+            sprite = arcade.Sprite(
+                tile.sprite_image.filename, tile.sprite_image.scaling
+            )
             self.sprite_map[tile_point] = sprite
             tile_adventure_point = self.geo.origin_point_to_adventure_point(tile_point)
             sprite.left = tile_adventure_point.x
             sprite.top = tile_adventure_point.y
-            if tile == sprite_images.GRASS_TILE_IMAGE:
-                self.grass_list.append(sprite)
-            elif tile == sprite_images.BOX_CRATE_TILE_IMAGE:
-                self.wall_list.append(sprite)
+            if tile.is_walkable:
+                self.walkable_tiles_sprite_list.append(sprite)
             else:
-                raise ValueError(f"Unexpected tile: {tile}")
+                self.unwalkable_tiles_sprite_list.append(sprite)
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.
