@@ -118,7 +118,9 @@ class WorldView(arcade.View):
     def possibly_create_an_enemy(self, op: geography.OriginPoint) -> None:
         if random.randrange(150) != 0:
             return
-        enemy = enemy_sprites.EnemySprite(sprite_images.SLIME_IMAGE)
+        enemy_strength = models.pick_enemy_strength(op)
+        enemy_model = models.EnemyModel(enemy_strength)
+        enemy = enemy_sprites.EnemySprite(sprite_images.SLIME_IMAGE, enemy_model)
         ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(op)
         enemy.left = ap.x
         enemy.top = ap.y
