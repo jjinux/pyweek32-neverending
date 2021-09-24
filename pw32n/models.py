@@ -39,8 +39,13 @@ class EnemyModel(Combatant):
 
 
 def pick_enemy_strength(op: geography.OriginPoint) -> float:
+    return random.uniform(
+        MIN_INITIAL_ENEMY_STRENGTH_TO_PICK, _pick_enemy_strength_non_random(op)
+    )
+
+
+def _pick_enemy_strength_non_random(op: geography.OriginPoint) -> float:
     """As you get further away from the origin, the enemies get stronger."""
     distance = math.sqrt(op.x ** 2 + op.y ** 2)
     strength_based_on_distance = distance * RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH
-    max_strength = max(MIN_INITIAL_ENEMY_STRENGTH_TO_PICK, strength_based_on_distance)
-    return random.uniform(MIN_INITIAL_ENEMY_STRENGTH_TO_PICK, max_strength)
+    return max(MIN_INITIAL_ENEMY_STRENGTH_TO_PICK, strength_based_on_distance)
