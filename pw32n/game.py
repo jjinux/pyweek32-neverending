@@ -77,6 +77,13 @@ class WorldView(arcade.View):
         if tile is None:
             tile = self.pick_new_tile(tile_point)
             self.geo.tile_map.put(tile_point, tile)
+
+        # If we're calling get_tile, it's because we're walking in a certain direction and loading
+        # tiles (pre-existing or not). If the tile is walkable, it's a good time to possibly put
+        # a new enemy on that tile.
+        if tile.is_walkable:
+            self.possibly_create_an_enemy(tile_point)
+
         return tile
 
     def pick_new_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
@@ -94,11 +101,6 @@ class WorldView(arcade.View):
         # Otherwise, pick grass.
         else:
             tile = tiles.GRASS_TILE
-
-        # Whenever we're picking a new tile, and we pick grass, that's a good time to possibly
-        # put a new enemy on that tile.
-        if tile == tiles.GRASS_TILE:
-            self.possibly_create_an_enemy(tile_point)
 
         return tile
 
