@@ -207,7 +207,8 @@ class WorldView(arcade.View):
             self.player_sprite, self.enemy_sprite_list
         )
         if enemy_hit_list:
-            self.window.show_view(BattleView())
+            enemy_model = enemy_hit_list[0].model
+            self.window.show_view(BattleView(enemy_model))
 
     def update_tiles(self) -> None:
         """Add and remove tiles as the user "moves" around."""
@@ -242,9 +243,10 @@ class WorldView(arcade.View):
 class BattleView(arcade.View):
     SIDE_MARGIN = 128
 
-    def __init__(self) -> None:
+    def __init__(self, enemy_model: models.EnemyModel) -> None:
         super().__init__()
         self.geo = self.window.geo
+        self.enemy_model = enemy_model
 
         self.wall_list: arcade.SpriteList = None
         self.player_list = arcade.SpriteList()
