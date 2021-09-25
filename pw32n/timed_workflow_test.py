@@ -27,6 +27,7 @@ class TimedWorkflowExample:
             w.on_update(delta_time)
 
     def enter_state_1(self, late_by: Secs) -> None:
+        assert self.main_workflow.completion_ratio_for_current_step == 1.0
         self.state = self.STATE_1
         self.last_late_by = late_by
 
