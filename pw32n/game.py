@@ -384,12 +384,12 @@ class BattleView(arcade.View):
         if isinstance(model.state, models.WarmingUpState):
             delta_x = round(
                 model.current_battle_move.delta_x
-                * model.battle_move_workflow.completion_ratio_for_current_step
+                * model.current_workflow.completion_ratio_for_current_step
                 * self.MAX_PLAYER_MOVEMENT
             )
             delta_y = round(
                 model.current_battle_move.delta_y
-                * model.battle_move_workflow.completion_ratio_for_current_step
+                * model.current_workflow.completion_ratio_for_current_step
                 * self.MAX_PLAYER_MOVEMENT
             )
         elif isinstance(model.state, models.ExecutingMoveState):
@@ -398,12 +398,12 @@ class BattleView(arcade.View):
         elif isinstance(model.state, models.CoolingDownState):
             delta_x = round(
                 model.current_battle_move.delta_x
-                * (1.0 - model.battle_move_workflow.completion_ratio_for_current_step)
+                * (1.0 - model.current_workflow.completion_ratio_for_current_step)
                 * self.MAX_PLAYER_MOVEMENT
             )
             delta_y = round(
                 model.current_battle_move.delta_y
-                * (1.0 - model.battle_move_workflow.completion_ratio_for_current_step)
+                * (1.0 - model.current_workflow.completion_ratio_for_current_step)
                 * self.MAX_PLAYER_MOVEMENT
             )
         elif isinstance(model.state, models.StunnedState):

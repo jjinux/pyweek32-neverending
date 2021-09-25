@@ -48,8 +48,7 @@ class CombatantModel:
         self.__strength = self.MIN_STRENGTH
         self.strength_at_the_beginning_of_battle = 0.0
         self.state: CombatantState = IdleState()
-        self.battle_move_workflow: TimedWorkflow = None
-        self.running_workflows: set[TimedWorkflow] = set()
+        self.current_workflow: TimedWorkflow = None
         self.current_battle_move: battle_moves.BattleMove = None
         self.other: CombatantModel = None
 
@@ -74,7 +73,7 @@ class CombatantModel:
             return
         self.current_battle_move = move
         self.other = other
-        self.battle_move_workflow = TimedWorkflow(
+        self.current_workflow = TimedWorkflow(
             name=BATTLE_MOVE_WORKFLOW,
             steps=[
                 TimedStep(Secs(0.0), self.enter_warmup_period),
@@ -83,13 +82,10 @@ class CombatantModel:
                 TimedStep(move.cooldown_period, self.return_to_idle),
             ],
         )
-        self.running_workflows.add(self.battle_move_workflow)
 
     def on_battle_view_update(self, delta_time: float) -> None:
-        # The call to list() is important because during cleanup, we'll be removing a workflow
-        # from the set while still iterating.
-        for w in list(self.running_workflows):
-            w.on_update(delta_time)
+        if self.current_workflow:
+            self.current_workflow.on_update(delta_time)
 
     def enter_warmup_period(self, late_by: Secs) -> None:
         self.state = WarmingUpState()
@@ -107,8 +103,7 @@ class CombatantModel:
         # Remember to clean up.
         self.current_battle_move = None
         self.other = None
-        self.running_workflows.remove(self.battle_move_workflow)
-        self.battle_move_workflow = None
+        self.current_workflow = None
 
 
 class PlayerModel(CombatantModel):

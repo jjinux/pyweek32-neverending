@@ -52,8 +52,7 @@ class CombatantModelTestCase(unittest.TestCase):
 
     def test_battle_move_workflow(self) -> None:
         self.assertIsInstance(self.model.state, IdleState)
-        self.assertIsNone(self.model.battle_move_workflow)
-        self.assertFalse(self.model.running_workflows)
+        self.assertIsNone(self.model.current_workflow)
         self.assertIsNone(self.model.current_battle_move)
         self.assertIsNone(self.model.other)
 
@@ -62,11 +61,10 @@ class CombatantModelTestCase(unittest.TestCase):
         self.model.attempt_battle_move(battle_moves.JAB, other)
         self.assertEqual(self.model.current_battle_move, battle_moves.JAB)
         self.assertEqual(self.model.other, other)
-        self.assertIsNotNone(self.model.battle_move_workflow)
-        self.assertEqual(self.model.battle_move_workflow.name, BATTLE_MOVE_WORKFLOW)
-        self.assertTrue(self.model.running_workflows)
+        self.assertIsNotNone(self.model.current_workflow)
+        self.assertEqual(self.model.current_workflow.name, BATTLE_MOVE_WORKFLOW)
 
-        num_steps = len(self.model.battle_move_workflow.steps)
+        num_steps = len(self.model.current_workflow.steps)
         saw_warming_up_state = False
         saw_executing_move_state = False
         saw_cooling_down_state = False
@@ -89,8 +87,7 @@ class CombatantModelTestCase(unittest.TestCase):
         self.assertTrue(saw_idle_state_again)
         self.assertEqual(other.strength, 0.0)
 
-        self.assertIsNone(self.model.battle_move_workflow)
-        self.assertFalse(self.model.running_workflows)
+        self.assertIsNone(self.model.current_workflow)
         self.assertIsNone(self.model.current_battle_move)
         self.assertIsNone(self.model.other)
 
@@ -98,7 +95,7 @@ class CombatantModelTestCase(unittest.TestCase):
         self.model.state = WarmingUpState()
         other = CombatantModel()
         self.model.attempt_battle_move(battle_moves.JAB, other)
-        self.assertIsNone(self.model.battle_move_workflow)
+        self.assertIsNone(self.model.current_workflow)
 
 
 class PlayerModelTestCase(unittest.TestCase):
