@@ -361,11 +361,15 @@ class BattleView(arcade.View):
 
     def on_draw(self) -> None:
         arcade.start_render()
+        if self.window.player_model.strength == self.window.player_model.MIN_STRENGTH:
+            strength = "Weak"
+        else:
+            strength = self.window.format_strength(self.window.player_model.strength)
         status = " ".join(
             [
-                f"Strength: {self.window.format_strength(self.window.player_model.strength)}",
+                f"Strength: {strength}",
                 f"Enemy: {self.window.format_strength(self.enemy_model.strength)}",
-                "(d)odge (j)ab (u)ppercut",
+                "(j)ab (u)ppercut (esc)",
             ]
         )
         self.window.draw_status_at_bottom(status)
