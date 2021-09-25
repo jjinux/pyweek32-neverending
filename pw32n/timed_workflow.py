@@ -37,6 +37,8 @@ class TimedWorkflow:
 
     @property
     def completion_ratio_for_current_step(self) -> float:
+        if self.initial_countdown == 0.0:
+            return 1.0
         return (
             self.initial_countdown - max(0.0, self.countdown)
         ) / self.initial_countdown

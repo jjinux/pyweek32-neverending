@@ -93,3 +93,9 @@ class TimedWorkflowTestCase(unittest.TestCase):
             ctx.exception.args[0],
             f"You forgot to cleanup your workflow; you should do that in your last step: {self.example.main_workflow}",
         )
+
+    def test_avoid_dividing_by_zero(self) -> None:
+        main_workflow = self.example.main_workflow
+        main_workflow.initial_countdown = 0.0
+        main_workflow.countdown = 0.0
+        self.assertEqual(main_workflow.completion_ratio_for_current_step, 1.0)
