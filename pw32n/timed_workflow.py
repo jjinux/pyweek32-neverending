@@ -1,11 +1,11 @@
 from typing import NamedTuple, Callable
 
-MS = float
-Callback = Callable[[MS], int]
+Secs = float
+Callback = Callable[[Secs], int]
 
 
 class TimedStep(NamedTuple):
-    delay: MS
+    delay: Secs
     callback: Callback
 
 
@@ -15,7 +15,7 @@ class TimedWorkflow:
 
     def __init__(self, steps: list[TimedStep]) -> None:
         self._steps = steps
-        self._countdown = MS(0.0)
+        self._countdown = Secs(0.0)
         self._set_next_countdown()
 
     def on_update(self, delta_time: float) -> None:
