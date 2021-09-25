@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any, cast
 
 from pw32n import geography
 from pw32n.units import Secs
