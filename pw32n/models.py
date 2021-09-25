@@ -10,7 +10,7 @@ from pw32n.timed_workflow import TimedWorkflow, TimedStep
 from pw32n.units import Secs
 
 MIN_INITIAL_ENEMY_STRENGTH_TO_PICK = 0.1
-RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH = 0.001
+RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH = 0.01
 
 
 class IdleState(NamedTuple):
