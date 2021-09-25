@@ -1,6 +1,7 @@
 from typing import NamedTuple, Callable
 
-Secs = float
+from pw32n.units import Secs
+
 Callback = Callable[[Secs], int]
 
 

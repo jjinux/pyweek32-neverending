@@ -1,6 +1,7 @@
 import unittest
 
-from pw32n.timed_workflow import Secs, TimedWorkflow, TimedStep
+from pw32n.timed_workflow import TimedWorkflow, TimedStep
+from pw32n.units import Secs
 
 
 class TimedWorkflowExample:
