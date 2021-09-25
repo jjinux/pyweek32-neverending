@@ -5,6 +5,7 @@ import math
 import random
 
 from pw32n import geography
+from pw32n import sprite_images
 from pw32n.units import Secs
 
 MIN_INITIAL_ENEMY_STRENGTH_TO_PICK = 0.1
@@ -65,11 +66,13 @@ class EnemyModel(CombatantModel):
 
     def __init__(
         self,
+        sprite_image: sprite_images.SpriteImage,
         position: geography.OriginPoint,
         strength: float,
         player_model: PlayerModel,
     ) -> None:
         super().__init__()
+        self.sprite_image = sprite_image
         self.position = position
         self.strength = strength
         self.player_model = player_model

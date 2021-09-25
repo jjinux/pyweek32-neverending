@@ -1,6 +1,7 @@
 import unittest
 
 from pw32n.geography import OriginPoint
+from pw32n import sprite_images
 from pw32n.models import (
     CombatantModel,
     PlayerModel,
@@ -67,6 +68,7 @@ class PlayerModelTestCase(unittest.TestCase):
     def test_on_enemy_died_gives_strength_to_the_player(self) -> None:
         strength_at_the_beginning_of_battle = 10.0
         self.enemy_model = EnemyModel(
+            sprite_image=sprite_images.ZOMBIE_IMAGE,
             position=OriginPoint(0, 0),
             strength=strength_at_the_beginning_of_battle,
             player_model=self.player_model,
@@ -85,7 +87,10 @@ class EnemyModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self.player_model = PlayerModel()
         self.enemy_model = EnemyModel(
-            position=OriginPoint(0, 0), strength=10.0, player_model=self.player_model
+            sprite_image=sprite_images.ZOMBIE_IMAGE,
+            position=OriginPoint(0, 0),
+            strength=10.0,
+            player_model=self.player_model,
         )
 
     def test_dying(self) -> None:

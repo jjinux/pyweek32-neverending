@@ -29,3 +29,21 @@ GRASS_SIDE_VIEW_TILE_IMAGE = SpriteImage(
 ZOMBIE_IMAGE = SpriteImage(
     ":resources:images/animated_characters/zombie/zombie_idle.png", width=128
 )
+
+MALE_PERSON_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/male_person/malePerson_idle.png", width=128
+)
+
+FEMALE_PERSON_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/female_person/femalePerson_idle.png",
+    width=128,
+)
+
+MALE_ADVENTURER_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png",
+    width=128,
+)
+
+ROBOT_IMAGE = SpriteImage(
+    ":resources:images/animated_characters/robot/robot_idle.png", width=128
+)

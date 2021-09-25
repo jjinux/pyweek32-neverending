@@ -165,8 +165,23 @@ class WorldView(arcade.View):
         if random.randrange(150) != 0:
             return
         enemy_strength = models.pick_enemy_strength(op)
+
+        # Just pick a random image for the enemy. For now, all the behavior is the same.
+        sprite_image = random.choice(
+            (
+                sprite_images.ZOMBIE_IMAGE,
+                sprite_images.MALE_PERSON_IMAGE,
+                sprite_images.FEMALE_PERSON_IMAGE,
+                sprite_images.MALE_ADVENTURER_IMAGE,
+                sprite_images.ROBOT_IMAGE,
+            )
+        )
+
         enemy_model = models.EnemyModel(
-            position=op, strength=enemy_strength, player_model=self.window.player_model
+            sprite_image=sprite_image,
+            position=op,
+            strength=enemy_strength,
+            player_model=self.window.player_model,
         )
         self.window.enemy_models.add(enemy_model)
         self.create_enemy_sprite_from_model(enemy_model)
@@ -176,8 +191,8 @@ class WorldView(arcade.View):
     ) -> enemy_sprites.EnemySprite:
         sprite = enemy_sprites.EnemySprite(
             model,
-            sprite_images.ZOMBIE_IMAGE.filename,
-            scale=(self.geo.tile_width / sprite_images.ZOMBIE_IMAGE.width),
+            model.sprite_image.filename,
+            scale=(self.geo.tile_width / model.sprite_image.width),
         )
         ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(
             model.position
@@ -330,8 +345,8 @@ class BattleView(arcade.View):
         self.player_list.append(self.player_sprite)
 
         self.enemy_sprite = arcade.Sprite(
-            sprite_images.ZOMBIE_IMAGE.filename,
-            scale=(self.PLAYER_WIDTH / sprite_images.PLAYER_IMAGE.width),
+            enemy_model.sprite_image.filename,
+            scale=(self.PLAYER_WIDTH / enemy_model.sprite_image.width),
         )
         self.enemy_list.append(self.enemy_sprite)
 
