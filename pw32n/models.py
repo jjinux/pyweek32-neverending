@@ -38,6 +38,7 @@ CombatantState = Union[
 ]
 
 BATTLE_MOVE_WORKFLOW = "BATTLE_MOVE_WORKFLOW"
+STUNNED_WORKFLOW = "STUNNED_WORKFLOW"
 
 
 class CombatantModel:
@@ -52,6 +53,7 @@ class CombatantModel:
         self.current_battle_move: battle_moves.BattleMove = None
         self.other: CombatantModel = None
         self.dodging = False
+        self.flip_sprite_upside_down = False
 
     @property
     def strength(self) -> float:
@@ -69,6 +71,13 @@ class CombatantModel:
             return
 
         self.strength -= power
+        self.current_workflow = TimedWorkflow(
+            name=STUNNED_WORKFLOW,
+            steps=[
+                TimedStep(Secs(0.0), self.enter_stunned_period),
+                TimedStep(battle_moves.STUNNED.execution_period, self.return_to_idle),
+            ],
+        )
 
     def attempt_battle_move(
         self, move: battle_moves.BattleMove, other: CombatantModel
@@ -106,8 +115,13 @@ class CombatantModel:
         if self.current_battle_move == battle_moves.DODGE:
             self.dodging = False
 
+    def enter_stunned_period(self, late_by: Secs) -> None:
+        self.state = StunnedState()
+        self.flip_sprite_upside_down = True
+
     def return_to_idle(self, late_by: Secs) -> None:
         self.state = IdleState()
+        self.flip_sprite_upside_down = False
 
         # Remember to clean up.
         self.current_battle_move = None
