@@ -2,7 +2,7 @@ from typing import Any
 
 import arcade
 
-from pw32n import sprite_images, models
+from pw32n import models
 
 
 class EnemySprite(arcade.Sprite):

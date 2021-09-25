@@ -30,6 +30,9 @@ class GameWindow(arcade.Window):
         self.geo.screen_width = width
         self.geo.screen_height = height
 
+    def on_enemy_died(self, enemy: models.EnemyModel) -> None:
+        self.enemy_models.remove(enemy)
+
 
 class WorldView(arcade.View):
     PLAYER_MOVEMENT_SPEED = 5
@@ -39,6 +42,9 @@ class WorldView(arcade.View):
 
     # How fast the camera pans to the player. 1.0 is instant.
     CAMERA_SPEED = 1.0
+
+    # How many screen widths or heights can an enemy be away before it gets killed?
+    ENEMY_DISTANCE_KEEPALIVE_RATIO = 3
 
     def __init__(self) -> None:
         super().__init__()
@@ -221,6 +227,7 @@ class WorldView(arcade.View):
         for i in self.world_sprite_lists:
             i.move(-delta_x, -delta_y)
 
+        self.update_enemies()
         self.update_tiles()
 
         # Move the camera so that the player is in the middle of the screen. This should only be
@@ -263,6 +270,18 @@ class WorldView(arcade.View):
                 self.walkable_tiles_sprite_list.append(sprite)
             else:
                 self.unwalkable_tiles_sprite_list.append(sprite)
+
+    def update_enemies(self) -> None:
+        """Throw away enemies that are now too far away from the center of the universe."""
+        for enemy_sprite in self.enemy_sprite_list:
+            if (
+                abs(enemy_sprite.center_x)
+                > self.ENEMY_DISTANCE_KEEPALIVE_RATIO * self.window.width
+                or abs(enemy_sprite.center_y)
+                > self.ENEMY_DISTANCE_KEEPALIVE_RATIO * self.window.height
+            ):
+                enemy_sprite.kill()
+                self.window.on_enemy_died(enemy_sprite.model)
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.
@@ -330,7 +349,7 @@ class BattleView(arcade.View):
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         # For now, hitting escape just kills the enemy.
         if symbol == arcade.key.ESCAPE:
-            self.window.enemy_models.remove(self.enemy_model)
+            self.window.on_enemy_died(self.enemy_model)
             self.window.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:
