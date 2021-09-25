@@ -387,7 +387,7 @@ class BattleView(arcade.View):
             [
                 f"Strength: {strength}",
                 f"Enemy: {self.window.format_strength(self.enemy_model.strength)}",
-                "(j)ab (u)ppercut (esc)ape",
+                "(d)odge (j)ab (u)ppercut (esc)ape",
             ]
         )
         self.window.draw_status_at_bottom(status)
