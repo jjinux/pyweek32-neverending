@@ -3,12 +3,41 @@ from __future__ import annotations
 
 import math
 import random
+from typing import NamedTuple, Union
 
 from pw32n import geography, sprite_images, battle_moves
+from pw32n.timed_workflow import TimedWorkflow, TimedStep
 from pw32n.units import Secs
 
 MIN_INITIAL_ENEMY_STRENGTH_TO_PICK = 0.1
 RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH = 0.001
+
+
+class IdleState(NamedTuple):
+    pass
+
+
+class WarmingUpState(NamedTuple):
+    pass
+
+
+class ExecutingMoveState(NamedTuple):
+    pass
+
+
+class CoolingDownState(NamedTuple):
+    pass
+
+
+class StunnedState(NamedTuple):
+    pass
+
+
+CombatantState = Union[
+    IdleState, WarmingUpState, ExecutingMoveState, CoolingDownState, StunnedState
+]
+
+BATTLE_MOVE_WORKFLOW = "BATTLE_MOVE_WORKFLOW"
 
 
 class CombatantModel:
@@ -18,6 +47,11 @@ class CombatantModel:
     def __init__(self) -> None:
         self.__strength = self.MIN_STRENGTH
         self.strength_at_the_beginning_of_battle = 0.0
+        self.state: CombatantState = IdleState()
+        self.battle_move_workflow: TimedWorkflow = None
+        self.running_workflows: set[TimedWorkflow] = set()
+        self.current_battle_move: battle_moves.BattleMove = None
+        self.other: CombatantModel = None
 
     @property
     def strength(self) -> float:
@@ -33,14 +67,48 @@ class CombatantModel:
     def on_attacked(self, power: float) -> None:
         self.strength -= power
 
-    def attempt_dodge(self, other: CombatantModel) -> None:
-        pass
+    def attempt_battle_move(
+        self, move: battle_moves.BattleMove, other: CombatantModel
+    ) -> None:
+        if not isinstance(self.state, IdleState):
+            return
+        self.current_battle_move = move
+        self.other = other
+        self.battle_move_workflow = TimedWorkflow(
+            name=BATTLE_MOVE_WORKFLOW,
+            steps=[
+                TimedStep(Secs(0.0), self.enter_warmup_period),
+                TimedStep(move.warmup_period, self.enter_execution_period),
+                TimedStep(move.execution_period, self.enter_cooldown_period),
+                TimedStep(move.cooldown_period, self.return_to_idle),
+            ],
+        )
+        self.running_workflows.add(self.battle_move_workflow)
 
-    def attempt_jab(self, other: CombatantModel) -> None:
-        other.on_attacked(battle_moves.JAB.base_strength)
+    def on_battle_view_update(self, delta_time: float) -> None:
+        # The call to list() is important because during cleanup, we'll be removing a workflow
+        # from the set while still iterating.
+        for w in list(self.running_workflows):
+            w.on_update(delta_time)
 
-    def attempt_uppercut(self, other: CombatantModel) -> None:
-        other.on_attacked(battle_moves.UPPERCUT.base_strength)
+    def enter_warmup_period(self, late_by: Secs) -> None:
+        self.state = WarmingUpState()
+
+    def enter_execution_period(self, late_by: Secs) -> None:
+        self.state = ExecutingMoveState()
+        self.other.on_attacked(self.current_battle_move.base_strength)
+
+    def enter_cooldown_period(self, late_by: Secs) -> None:
+        self.state = CoolingDownState()
+
+    def return_to_idle(self, late_by: Secs) -> None:
+        self.state = IdleState()
+
+        # Remember to clean up.
+        self.current_battle_move = None
+        self.other = None
+        self.running_workflows.remove(self.battle_move_workflow)
+        self.battle_move_workflow = None
 
 
 class PlayerModel(CombatantModel):
@@ -89,11 +157,14 @@ class EnemyModel(CombatantModel):
         return self.strength == 0.0
 
     def on_battle_view_update(self, delta_time: float) -> None:
+        super().on_battle_view_update(delta_time)
+        if not isinstance(self.state, IdleState):
+            return
         if random.randrange(self.AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING) == 0:
             move = random.choice(
-                [self.attempt_dodge, self.attempt_jab, self.attempt_uppercut]
+                [battle_moves.DODGE, battle_moves.JAB, battle_moves.UPPERCUT]
             )
-            move(self.player_model)
+            self.attempt_battle_move(move, self.player_model)
 
 
 def pick_enemy_strength(op: geography.OriginPoint) -> float:
