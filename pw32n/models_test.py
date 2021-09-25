@@ -1,7 +1,9 @@
+import random
 import unittest
+from unittest.mock import patch, Mock
 
 from pw32n.geography import OriginPoint
-from pw32n import sprite_images
+from pw32n import sprite_images, battle_moves
 from pw32n.models import (
     CombatantModel,
     PlayerModel,
@@ -10,6 +12,11 @@ from pw32n.models import (
     _pick_enemy_strength_non_random,
     MIN_INITIAL_ENEMY_STRENGTH_TO_PICK,
     RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH,
+    IdleState,
+    WarmingUpState,
+    ExecutingMoveState,
+    CoolingDownState,
+    BATTLE_MOVE_WORKFLOW,
 )
 from pw32n.units import Secs
 
@@ -42,6 +49,56 @@ class CombatantModelTestCase(unittest.TestCase):
         self.model.strength = 1.0
         self.model.on_attacked(100.0)
         self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+
+    def test_battle_move_workflow(self) -> None:
+        self.assertIsInstance(self.model.state, IdleState)
+        self.assertIsNone(self.model.battle_move_workflow)
+        self.assertFalse(self.model.running_workflows)
+        self.assertIsNone(self.model.current_battle_move)
+        self.assertIsNone(self.model.other)
+
+        other = CombatantModel()
+        other.strength = battle_moves.JAB.base_strength
+        self.model.attempt_battle_move(battle_moves.JAB, other)
+        self.assertEqual(self.model.current_battle_move, battle_moves.JAB)
+        self.assertEqual(self.model.other, other)
+        self.assertIsNotNone(self.model.battle_move_workflow)
+        self.assertEqual(self.model.battle_move_workflow.name, BATTLE_MOVE_WORKFLOW)
+        self.assertTrue(self.model.running_workflows)
+
+        num_steps = len(self.model.battle_move_workflow.steps)
+        saw_warming_up_state = False
+        saw_executing_move_state = False
+        saw_cooling_down_state = False
+        saw_idle_state_again = False
+
+        for i in range(num_steps):
+            self.model.on_battle_view_update(Secs(1.0))
+            if isinstance(self.model.state, WarmingUpState):
+                saw_warming_up_state = True
+            elif isinstance(self.model.state, ExecutingMoveState):
+                saw_executing_move_state = True
+            elif isinstance(self.model.state, CoolingDownState):
+                saw_cooling_down_state = True
+            elif isinstance(self.model.state, IdleState):
+                saw_idle_state_again = True
+
+        self.assertTrue(saw_warming_up_state)
+        self.assertTrue(saw_executing_move_state)
+        self.assertTrue(saw_cooling_down_state)
+        self.assertTrue(saw_idle_state_again)
+        self.assertEqual(other.strength, 0.0)
+
+        self.assertIsNone(self.model.battle_move_workflow)
+        self.assertFalse(self.model.running_workflows)
+        self.assertIsNone(self.model.current_battle_move)
+        self.assertIsNone(self.model.other)
+
+    def test_attempt_battle_move_exits_early_when_not_idle(self) -> None:
+        self.model.state = WarmingUpState()
+        other = CombatantModel()
+        self.model.attempt_battle_move(battle_moves.JAB, other)
+        self.assertIsNone(self.model.battle_move_workflow)
 
 
 class PlayerModelTestCase(unittest.TestCase):
@@ -98,6 +155,25 @@ class EnemyModelTestCase(unittest.TestCase):
         self.enemy_model.strength -= 100.0
         self.assertEqual(self.enemy_model.strength, 0.0)
         self.assertTrue(self.enemy_model.is_dead)
+
+    @patch.object(CombatantModel, "attempt_battle_move")
+    @patch.object(random, "choice", return_value=battle_moves.DODGE)
+    @patch.object(random, "randrange", return_value=0)
+    def test_on_battle_view_update(
+        self, m_randrange: Mock, m_choice: Mock, m_attempt_battle_move: Mock
+    ) -> None:
+        self.enemy_model.on_battle_view_update(Secs(0.0))
+        m_attempt_battle_move.assert_called_once_with(
+            battle_moves.DODGE, self.enemy_model.player_model
+        )
+
+    @patch.object(CombatantModel, "attempt_battle_move")
+    def test_on_battle_view_update_exits_early_when_not_idle(
+        self, m_attempt_battle_move: Mock
+    ) -> None:
+        self.enemy_model.state = ExecutingMoveState()
+        self.enemy_model.on_battle_view_update(Secs(0.0))
+        m_attempt_battle_move.assert_not_called()
 
 
 class PickEnemyStrengthTestCase(unittest.TestCase):
