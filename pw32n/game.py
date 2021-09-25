@@ -396,10 +396,12 @@ class BattleView(arcade.View):
         self.enemy_list.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
-        if symbol == arcade.key.J:
-            self.enemy_model.on_attacked(models.JAB_STRENGTH)
+        if symbol == arcade.key.D:
+            self.window.player_model.attempt_dodge(self.enemy_model)
+        elif symbol == arcade.key.J:
+            self.window.player_model.attempt_jab(self.enemy_model)
         elif symbol == arcade.key.U:
-            self.enemy_model.on_attacked(models.UPPERCUT_STRENGTH)
+            self.window.player_model.attempt_uppercut(self.enemy_model)
 
         # For now, hitting escape just kills the enemy.
         elif symbol == arcade.key.ESCAPE:
