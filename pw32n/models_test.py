@@ -84,8 +84,9 @@ class CombatantModelTestCase(unittest.TestCase):
         self.assertIsNone(self.model.current_battle_move)
         self.assertIsNone(self.model.other)
 
+        self.model.strength_at_the_beginning_of_battle = 10.0
         other = CombatantModel()
-        other.strength = battle_moves.JAB.base_strength
+        other.strength = 0.1
         self.model.attempt_battle_move(battle_moves.JAB, other)
         self.assertEqual(self.model.current_battle_move, battle_moves.JAB)
         self.assertEqual(self.model.other, other)
@@ -137,6 +138,16 @@ class CombatantModelTestCase(unittest.TestCase):
         other = CombatantModel()
         self.model.attempt_battle_move(battle_moves.JAB, other)
         self.assertIsNone(self.model.current_workflow)
+
+    def test_calculate_power(self) -> None:
+        for (strength, move, expected) in (
+            (1.0, battle_moves.JAB, 0.1),
+            (1.0, battle_moves.UPPERCUT, 0.3),
+            (10.0, battle_moves.JAB, 1.0),
+        ):
+            self.model.strength_at_the_beginning_of_battle = strength
+            self.model.current_battle_move = move
+            self.assertAlmostEqual(self.model.calculate_power(), expected)
 
 
 class PlayerModelTestCase(unittest.TestCase):
@@ -194,24 +205,34 @@ class EnemyModelTestCase(unittest.TestCase):
         self.assertEqual(self.enemy_model.strength, 0.0)
         self.assertTrue(self.enemy_model.is_dead)
 
-    @patch.object(CombatantModel, "attempt_battle_move")
-    @patch.object(random, "choice", return_value=battle_moves.DODGE)
-    @patch.object(random, "randrange", return_value=0)
+    @patch.object(EnemyModel, "consider_attacking_on_each_tick")
     def test_on_battle_view_update(
-        self, m_randrange: Mock, m_choice: Mock, m_attempt_battle_move: Mock
+        self, m_consider_attacking_on_each_tick: Mock
     ) -> None:
         self.enemy_model.on_battle_view_update(Secs(0.0))
-        m_attempt_battle_move.assert_called_once_with(
-            battle_moves.DODGE, self.enemy_model.player_model
-        )
+        m_consider_attacking_on_each_tick.assert_called()
 
-    @patch.object(CombatantModel, "attempt_battle_move")
-    def test_on_battle_view_update_exits_early_when_not_idle(
-        self, m_attempt_battle_move: Mock
+    @patch.object(random, "choice")
+    @patch.object(random, "randrange")
+    def test_consider_attacking_on_each_tick_exits_early_when_not_idle(
+        self, m_randrange: Mock, m_choice: Mock
     ) -> None:
         self.enemy_model.state = ExecutingMoveState()
-        self.enemy_model.on_battle_view_update(Secs(0.0))
-        m_attempt_battle_move.assert_not_called()
+        self.enemy_model.consider_attacking_on_each_tick()
+        m_randrange.assert_not_called()
+        m_choice.assert_not_called()
+
+    @patch.object(CombatantModel, "attempt_battle_move")
+    def test_consider_attacking_on_each_tick_occasionally_attacks(
+        self, m_attempt_battle_move: Mock
+    ) -> None:
+        for i in range(10000):
+            self.enemy_model.state = IdleState()
+            self.enemy_model.consider_attacking_on_each_tick()
+            if m_attempt_battle_move.call_args_list:
+                break
+        else:
+            raise AssertionError("attempt_battle_move wasn't called in 1000 attempts")
 
 
 class PickEnemyStrengthTestCase(unittest.TestCase):
