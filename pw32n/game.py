@@ -316,6 +316,9 @@ class BattleView(arcade.View):
         self.geo = self.window.geo
         self.enemy_model = enemy_model
 
+        self.window.player_model.on_battle_view_begin()
+        enemy_model.on_battle_view_begin()
+
         self.wall_list: arcade.SpriteList = None
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()

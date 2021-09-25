@@ -28,6 +28,15 @@ class CombatantModelTestCase(unittest.TestCase):
         self.model.strength = -1.0
         self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
 
+    def test_on_battle_view_begin_keeps_track_of_strength_at_the_beginning_of_battle(
+        self,
+    ) -> None:
+        initial = 10.0
+        self.model.strength = initial
+        self.model.on_battle_view_begin()
+        self.strength = 0.0
+        self.assertEqual(self.model.strength_at_the_beginning_of_battle, initial)
+
     def test_on_attacked(self) -> None:
         self.model.strength = 1.0
         self.model.on_attacked(100.0)

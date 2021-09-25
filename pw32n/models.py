@@ -16,6 +16,7 @@ class CombatantModel:
 
     def __init__(self) -> None:
         self.__strength = self.MIN_STRENGTH
+        self.strength_at_the_beginning_of_battle = 0.0
 
     @property
     def strength(self) -> float:
@@ -24,6 +25,9 @@ class CombatantModel:
     @strength.setter
     def strength(self, strength: float) -> None:
         self.__strength = max(strength, self.MIN_STRENGTH)
+
+    def on_battle_view_begin(self) -> None:
+        self.strength_at_the_beginning_of_battle = self.strength
 
     def on_attacked(self, power: float) -> None:
         self.strength -= power
