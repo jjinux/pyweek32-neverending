@@ -51,6 +51,7 @@ class CombatantModel:
         self.current_workflow: TimedWorkflow = None
         self.current_battle_move: battle_moves.BattleMove = None
         self.other: CombatantModel = None
+        self.doding = False
 
     @property
     def strength(self) -> float:
@@ -92,10 +93,15 @@ class CombatantModel:
 
     def enter_execution_period(self, late_by: Secs) -> None:
         self.state = ExecutingMoveState()
-        self.other.on_attacked(self.current_battle_move.base_strength)
+        if self.current_battle_move == battle_moves.DODGE:
+            self.dodging = True
+        else:
+            self.other.on_attacked(self.current_battle_move.base_strength)
 
     def enter_cooldown_period(self, late_by: Secs) -> None:
         self.state = CoolingDownState()
+        if self.current_battle_move == battle_moves.DODGE:
+            self.dodging = False
 
     def return_to_idle(self, late_by: Secs) -> None:
         self.state = IdleState()

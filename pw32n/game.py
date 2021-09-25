@@ -136,7 +136,7 @@ class WorldView(arcade.View):
         surrounding_tiles = self.get_surrounding_tiles(tile_point)
 
         # About 60% of the time, just do the same as one of the neighboring tiles unless there
-        # aren't any. This makes the blocks "clumpier".
+        # aren't any. This makes the blocks of tiles "clumpier".
         if surrounding_tiles and random.randrange(100) < 60:
             tile = random.choice(surrounding_tiles)
 

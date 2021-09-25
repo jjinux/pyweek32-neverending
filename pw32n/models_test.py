@@ -91,6 +91,19 @@ class CombatantModelTestCase(unittest.TestCase):
         self.assertIsNone(self.model.current_battle_move)
         self.assertIsNone(self.model.other)
 
+    def test_battle_move_workflow_for_dodging(self) -> None:
+        self.assertFalse(self.model.doding)
+        other = CombatantModel()
+        self.model.attempt_battle_move(battle_moves.DODGE, other)
+        num_steps = len(self.model.current_workflow.steps)
+        for i in range(num_steps):
+            self.model.on_battle_view_update(Secs(1.0))
+            if isinstance(self.model.state, ExecutingMoveState):
+                self.assertTrue(self.model.dodging)
+            elif isinstance(self.model.state, CoolingDownState):
+                self.assertFalse(self.model.dodging)
+        self.assertFalse(self.model.dodging)
+
     def test_attempt_battle_move_exits_early_when_not_idle(self) -> None:
         self.model.state = WarmingUpState()
         other = CombatantModel()
