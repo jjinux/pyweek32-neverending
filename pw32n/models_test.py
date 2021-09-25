@@ -18,6 +18,7 @@ from pw32n.models import (
     CoolingDownState,
     StunnedState,
     BATTLE_MOVE_WORKFLOW,
+    STUNNED_WORKFLOW,
 )
 from pw32n.units import Secs
 
@@ -46,10 +47,24 @@ class CombatantModelTestCase(unittest.TestCase):
         self.strength = 0.0
         self.assertEqual(self.model.strength_at_the_beginning_of_battle, initial)
 
-    def test_on_attacked(self) -> None:
+    def test_on_attacked_and_stunned_workflow(self) -> None:
         self.model.strength = 1.0
+        self.assertIsNone(self.model.current_workflow)
+
         self.model.on_attacked(100.0)
         self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+        self.assertIsInstance(self.model.state, IdleState)
+        self.assertTrue(self.model.current_workflow)
+        self.assertEqual(self.model.current_workflow.name, STUNNED_WORKFLOW)
+
+        self.model.on_battle_view_update(Secs(1.0))
+        self.assertIsInstance(self.model.state, StunnedState)
+        self.assertTrue(self.model.give_it_a_whirl)
+
+        self.model.on_battle_view_update(Secs(1.0))
+        self.assertIsInstance(self.model.state, IdleState)
+        self.assertFalse(self.model.give_it_a_whirl)
+        self.assertIsNone(self.model.current_workflow)
 
     def test_on_attacked_when_dodging(self) -> None:
         self.model.strength = 5.0
