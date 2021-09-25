@@ -9,6 +9,8 @@ SCREEN_TITLE = "pyweek32-neverending"
 
 
 class GameWindow(arcade.Window):
+    STATUS_HEIGHT = 40
+
     def __init__(self) -> None:
         self.geo: geography.Geography[tiles.Tile] = geography.Geography()
         super().__init__(
@@ -32,6 +34,26 @@ class GameWindow(arcade.Window):
 
     def on_enemy_died(self, enemy: models.EnemyModel) -> None:
         self.enemy_models.remove(enemy)
+
+    def draw_status_at_bottom(self, status: str) -> None:
+        """This is a helper function for the different views to have a similar status field at the bottom."""
+        arcade.draw_rectangle_filled(
+            center_x=self.width // 2,
+            center_y=self.STATUS_HEIGHT // 2,
+            width=self.width,
+            height=self.STATUS_HEIGHT,
+            color=arcade.color.ALMOND,
+        )
+        arcade.draw_text(
+            text=status,
+            start_x=10,
+            start_y=10,
+            color=arcade.color.BLACK_BEAN,
+            font_size=20,
+        )
+
+    def format_strength(self, strength: float) -> str:
+        return f"{strength:.1f}"
 
 
 class WorldView(arcade.View):
@@ -172,21 +194,13 @@ class WorldView(arcade.View):
         self.player_list.draw()
 
         self.camera_gui.use()  # type: ignore
-        arcade.draw_rectangle_filled(
-            center_x=self.window.width // 2,
-            center_y=20,
-            width=self.window.width,
-            height=40,
-            color=arcade.color.ALMOND,
+        status = " ".join(
+            [
+                f"Pos: ({self.geo.position.x}, {self.geo.position.y})",
+                f"Strength: {self.window.format_strength(self.window.player_model.strength)}",
+            ]
         )
-        text = f"Pos: ({self.geo.position.x}, {self.geo.position.y}) Strength: {self.window.player_model.strength:.1f}"
-        arcade.draw_text(
-            text=text,
-            start_x=10,
-            start_y=10,
-            color=arcade.color.BLACK_BEAN,
-            font_size=20,
-        )
+        self.window.draw_status_at_bottom(status)
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
@@ -319,6 +333,9 @@ class BattleView(arcade.View):
         self.update_layout()
 
     def update_layout(self) -> None:
+        above_status_at_bottom = self.window.STATUS_HEIGHT
+        above_tiles = above_status_at_bottom + self.geo.tile_height
+
         # Just throw away the wall_list and start over.
         self.wall_list = arcade.SpriteList()
         for x in range(0, self.window.width, self.geo.tile_width):
@@ -329,19 +346,27 @@ class BattleView(arcade.View):
                 ),
             )
             wall.left = x
-            wall.bottom = 0
+            wall.bottom = above_status_at_bottom
             self.wall_list.append(wall)
 
         self.player_sprite.left = self.SIDE_MARGIN
-        self.player_sprite.bottom = self.geo.tile_height
+        self.player_sprite.bottom = above_tiles
         self.enemy_sprite.right = self.window.width - self.SIDE_MARGIN
-        self.enemy_sprite.bottom = self.geo.tile_height
+        self.enemy_sprite.bottom = above_tiles
 
     def on_show(self) -> None:
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def on_draw(self) -> None:
         arcade.start_render()
+        status = " ".join(
+            [
+                f"Strength: {self.window.format_strength(self.window.player_model.strength)}",
+                f"Enemy: {self.window.format_strength(self.enemy_model.strength)}",
+                "(d)odge (j)ab (u)ppercut",
+            ]
+        )
+        self.window.draw_status_at_bottom(status)
         self.wall_list.draw()
         self.player_list.draw()
         self.enemy_list.draw()
