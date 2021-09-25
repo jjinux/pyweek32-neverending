@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Any, cast
 
 from pw32n import geography
 from pw32n.units import Secs
@@ -52,6 +53,12 @@ class PlayerModel(CombatantModel):
         ):
             self.strength -= self.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING
             self.time_since_losing_strength_while_walking = Secs(0.0)
+
+    # I have a circular dependency between PlayerModel and EnemyModel :(
+    # Each needs to interact with the other, so I need to use Any and cast here.
+    def on_enemy_died(self, enemy: Any) -> None:
+        enemy = cast(EnemyModel, enemy)
+        self.strength += enemy.strength_at_the_beginning_of_battle
 
 
 class EnemyModel(CombatantModel):

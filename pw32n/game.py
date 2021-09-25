@@ -396,6 +396,7 @@ class BattleView(arcade.View):
             self.on_enemy_died()
 
     def on_enemy_died(self) -> None:
+        self.window.player_model.on_enemy_died(self.enemy_model)
         self.window.on_enemy_died(self.enemy_model)
         self.window.show_view(WorldView())
 

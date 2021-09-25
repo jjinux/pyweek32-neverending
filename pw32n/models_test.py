@@ -45,23 +45,39 @@ class CombatantModelTestCase(unittest.TestCase):
 
 class PlayerModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.model = PlayerModel()
+        self.player_model = PlayerModel()
 
     def test_min_strength(self) -> None:
-        self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+        self.assertEqual(self.player_model.strength, self.player_model.MIN_STRENGTH)
 
     def test_on_world_view_update_makes_you_lose_strength_while_walking(self) -> None:
         initial_strength = Secs(2.0)
-        self.model.strength = initial_strength
-        self.model.on_world_view_update(0.0)
-        self.assertEqual(self.model.strength, initial_strength)
+        self.player_model.strength = initial_strength
+        self.player_model.on_world_view_update(0.0)
+        self.assertEqual(self.player_model.strength, initial_strength)
 
-        self.model.on_world_view_update(
+        self.player_model.on_world_view_update(
             PlayerModel.TIME_BEFORE_LOSING_STRENGTH_WHILE_WALKING
         )
         self.assertEqual(
-            self.model.strength,
+            self.player_model.strength,
             initial_strength - PlayerModel.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING,
+        )
+
+    def test_on_enemy_died_gives_strength_to_the_player(self) -> None:
+        strength_at_the_beginning_of_battle = 10.0
+        self.enemy_model = EnemyModel(
+            position=OriginPoint(0, 0),
+            strength=strength_at_the_beginning_of_battle,
+            player_model=self.player_model,
+        )
+        self.enemy_model.strength_at_the_beginning_of_battle = (
+            strength_at_the_beginning_of_battle
+        )
+        self.player_model.on_enemy_died(self.enemy_model)
+        self.assertEqual(
+            self.player_model.strength,
+            PlayerModel.MIN_STRENGTH + strength_at_the_beginning_of_battle,
         )
 
 
