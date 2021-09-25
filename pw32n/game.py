@@ -325,6 +325,7 @@ class WorldView(arcade.View):
 class BattleView(arcade.View):
     PLAYER_WIDTH = 128
     SIDE_MARGIN = PLAYER_WIDTH
+    MAX_PLAYER_MOVEMENT = PLAYER_WIDTH
 
     def __init__(self, enemy_model: models.EnemyModel) -> None:
         super().__init__()
@@ -350,12 +351,11 @@ class BattleView(arcade.View):
         )
         self.enemy_list.append(self.enemy_sprite)
 
-        self.update_layout()
+        self.above_status_at_bottom = self.window.STATUS_HEIGHT
+        self.above_tiles = self.above_status_at_bottom + self.geo.tile_height
+        self.update_background()
 
-    def update_layout(self) -> None:
-        above_status_at_bottom = self.window.STATUS_HEIGHT
-        above_tiles = above_status_at_bottom + self.geo.tile_height
-
+    def update_background(self) -> None:
         # Just throw away the wall_list and start over.
         self.wall_list = arcade.SpriteList()
         for x in range(0, self.window.width, self.geo.tile_width):
@@ -366,13 +366,58 @@ class BattleView(arcade.View):
                 ),
             )
             wall.left = x
-            wall.bottom = above_status_at_bottom
+            wall.bottom = self.above_status_at_bottom
             self.wall_list.append(wall)
 
-        self.player_sprite.left = self.SIDE_MARGIN
-        self.player_sprite.bottom = above_tiles
-        self.enemy_sprite.right = self.window.width - self.SIDE_MARGIN
-        self.enemy_sprite.bottom = above_tiles
+    def update_combatant_position(
+        self,
+        model: models.CombatantModel,
+        sprite: arcade.Sprite,
+        left: int = None,
+        right: int = None,
+        bottom: int = 0,
+    ) -> None:
+        delta_x = 0
+        delta_y = 0
+        rotation = 0.0
+
+        if isinstance(model.state, models.WarmingUpState):
+            delta_x = round(
+                model.current_battle_move.delta_x
+                * model.battle_move_workflow.completion_ratio_for_current_step
+                * self.MAX_PLAYER_MOVEMENT
+            )
+            delta_y = round(
+                model.current_battle_move.delta_y
+                * model.battle_move_workflow.completion_ratio_for_current_step
+                * self.MAX_PLAYER_MOVEMENT
+            )
+        elif isinstance(model.state, models.ExecutingMoveState):
+            delta_x = model.current_battle_move.delta_x * self.MAX_PLAYER_MOVEMENT
+            delta_y = model.current_battle_move.delta_y * self.MAX_PLAYER_MOVEMENT
+        elif isinstance(model.state, models.CoolingDownState):
+            delta_x = round(
+                model.current_battle_move.delta_x
+                * (1.0 - model.battle_move_workflow.completion_ratio_for_current_step)
+                * self.MAX_PLAYER_MOVEMENT
+            )
+            delta_y = round(
+                model.current_battle_move.delta_y
+                * (1.0 - model.battle_move_workflow.completion_ratio_for_current_step)
+                * self.MAX_PLAYER_MOVEMENT
+            )
+        elif isinstance(model.state, models.StunnedState):
+            rotation = 30.0
+
+        if left is not None:
+            sprite.left = left + delta_x
+            if rotation != 0:
+                sprite.turn_right(rotation)
+        elif right is not None:
+            sprite.right = right - delta_x
+            if rotation != 0:
+                sprite.turn_left(rotation)
+        sprite.bottom = bottom + delta_y
 
     def on_show(self) -> None:
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
@@ -416,6 +461,20 @@ class BattleView(arcade.View):
     def on_update(self, delta_time: float) -> None:
         self.window.player_model.on_battle_view_update(delta_time)
         self.enemy_model.on_battle_view_update(delta_time)
+
+        self.update_combatant_position(
+            model=self.window.player_model,
+            sprite=self.player_sprite,
+            left=self.SIDE_MARGIN,
+            bottom=self.above_tiles,
+        )
+        self.update_combatant_position(
+            model=self.enemy_model,
+            sprite=self.enemy_sprite,
+            right=(self.window.width - self.SIDE_MARGIN),
+            bottom=self.above_tiles,
+        )
+
         if self.enemy_model.is_dead:
             self.on_enemy_died()
 
@@ -426,7 +485,7 @@ class BattleView(arcade.View):
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.
-        self.update_layout()
+        self.update_background()
 
 
 def main() -> None:
