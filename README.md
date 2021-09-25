@@ -50,7 +50,6 @@ pip install -r requirements.txt
 ```
 . ~/.virtualenvs/pyweek32-neverending/bin/activate
 make help
-make test
-make lint
 make setup_githooks
+make iterate
 ```
