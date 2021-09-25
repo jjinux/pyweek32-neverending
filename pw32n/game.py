@@ -3,7 +3,7 @@ import random
 import arcade
 from pyglet.math import Vec2  # type: ignore
 
-from pw32n import geography, sprite_images, models, tiles, enemy_sprites
+from pw32n import geography, sprite_images, models, tiles, enemy_sprites, battle_moves
 
 SCREEN_TITLE = "Lil Miss Vampire"
 
@@ -397,17 +397,24 @@ class BattleView(arcade.View):
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.D:
-            self.window.player_model.attempt_dodge(self.enemy_model)
+            self.window.player_model.attempt_battle_move(
+                battle_moves.DODGE, self.enemy_model
+            )
         elif symbol == arcade.key.J:
-            self.window.player_model.attempt_jab(self.enemy_model)
+            self.window.player_model.attempt_battle_move(
+                battle_moves.JAB, self.enemy_model
+            )
         elif symbol == arcade.key.U:
-            self.window.player_model.attempt_uppercut(self.enemy_model)
+            self.window.player_model.attempt_battle_move(
+                battle_moves.UPPERCUT, self.enemy_model
+            )
 
         # For now, hitting escape just kills the enemy.
         elif symbol == arcade.key.ESCAPE:
             self.on_enemy_died()
 
     def on_update(self, delta_time: float) -> None:
+        self.window.player_model.on_battle_view_update(delta_time)
         self.enemy_model.on_battle_view_update(delta_time)
         if self.enemy_model.is_dead:
             self.on_enemy_died()
