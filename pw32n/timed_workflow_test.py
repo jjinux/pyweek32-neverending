@@ -47,6 +47,11 @@ class TimedWorkflowTestCase(unittest.TestCase):
         self.assertIsNone(self.example.last_late_by)
 
         self.example.on_update(Secs(1.0))
+        self.assertEqual(self.example.main_workflow.initial_countdown, 1000.0)
+        self.assertEqual(self.example.main_workflow.countdown, 1000.0 - 1.0)
+        self.assertEqual(
+            self.example.main_workflow.completion_ratio_for_current_step, 1.0 / 1000.0
+        )
         self.assertEqual(self.example.state, TimedWorkflowExample.STATE_0)
 
         self.example.on_update(Secs(1000.0))
