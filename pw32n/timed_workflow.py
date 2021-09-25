@@ -14,7 +14,8 @@ class TimedWorkflow:
 
     """See TimedWorkflowExample in timed_workflow_test.py."""
 
-    def __init__(self, steps: list[TimedStep]) -> None:
+    def __init__(self, name: str, steps: list[TimedStep]) -> None:
+        self.name = name
         self.steps = steps
         self.initial_countdown = self.countdown = Secs(0.0)
         self._set_next_countdown()

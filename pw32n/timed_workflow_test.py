@@ -5,6 +5,7 @@ from pw32n.units import Secs
 
 
 class TimedWorkflowExample:
+    MAIN_WORKFLOW = "MAIN_WORKFLOW"
     STATE_0 = "STATE_0"
     STATE_1 = "STATE_1"
     STATE_2 = "STATE_2"
@@ -13,10 +14,11 @@ class TimedWorkflowExample:
         self.state = self.STATE_0
         self.last_late_by: Secs = None
         self.main_workflow = TimedWorkflow(
-            [
+            name=self.MAIN_WORKFLOW,
+            steps=[
                 TimedStep(Secs(1000.0), self.enter_state_1),
                 TimedStep(Secs(1000.0), self.enter_state_2),
-            ]
+            ],
         )
         self.running_workflows: set[TimedWorkflow] = set((self.main_workflow,))
 
