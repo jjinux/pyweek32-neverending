@@ -108,7 +108,15 @@ class CombatantModel:
         if self.current_battle_move == battle_moves.DODGE:
             self.dodging = True
         else:
-            self.other.on_attacked(self.current_battle_move.base_strength)
+            self.other.on_attacked(self.calculate_power())
+
+    def calculate_power(self) -> float:
+        """The power of the attack varies by the attack as well as your initial strength."""
+        return (
+            (1.0 / 10)
+            * self.strength_at_the_beginning_of_battle
+            * self.current_battle_move.base_strength
+        )
 
     def enter_cooldown_period(self, late_by: Secs) -> None:
         self.state = CoolingDownState()
@@ -154,8 +162,6 @@ class PlayerModel(CombatantModel):
 
 
 class EnemyModel(CombatantModel):
-    AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING = 45
-
     def __init__(
         self,
         sprite_image: sprite_images.SpriteImage,
@@ -176,13 +182,48 @@ class EnemyModel(CombatantModel):
 
     def on_battle_view_update(self, delta_time: float) -> None:
         super().on_battle_view_update(delta_time)
+        self.consider_attacking_on_each_tick()
+
+    def consider_attacking_on_each_tick(self) -> None:
         if not isinstance(self.state, IdleState):
             return
-        if random.randrange(self.AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING) == 0:
+
+        # Try to attack about 3 times in every 2 seconds.
+        if random.randrange(60 * 2) >= 3:
+            return
+
+        if (
+            self.player_model.current_battle_move == battle_moves.JAB
+            and isinstance(self.player_model.state, WarmingUpState)
+            and random.randrange(4) == 0
+        ):
+            move = battle_moves.DODGE
+
+        elif (
+            self.player_model.current_battle_move == battle_moves.UPPERCUT
+            and isinstance(self.player_model.state, WarmingUpState)
+            and random.randrange(4) == 0
+        ):
+            move = battle_moves.JAB
+
+        elif (
+            self.player_model.current_battle_move == battle_moves.DODGE
+            and random.randrange(4) == 0
+        ):
+            move = battle_moves.UPPERCUT
+
+        elif (
+            isinstance(self.player_model.state, StunnedState)
+            and random.randrange(4) == 0
+        ):
+            move = battle_moves.UPPERCUT
+
+        else:
             move = random.choice(
                 [battle_moves.DODGE, battle_moves.JAB, battle_moves.UPPERCUT]
             )
-            self.attempt_battle_move(move, self.player_model)
+
+        self.attempt_battle_move(move, self.player_model)
 
 
 def pick_enemy_strength(op: geography.OriginPoint) -> float:
