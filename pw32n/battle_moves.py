@@ -39,3 +39,11 @@ UPPERCUT = BattleMove(
     delta_x=0,
     delta_y=1,
 )
+STUNNED = BattleMove(
+    base_strength=0.0,
+    warmup_period=Secs(0.0),
+    execution_period=Secs(0.4),
+    cooldown_period=Secs(0.0),
+    delta_x=0,
+    delta_y=0,
+)
