@@ -5,7 +5,7 @@ from pyglet.math import Vec2  # type: ignore
 
 from pw32n import geography, sprite_images, models, tiles, enemy_sprites
 
-SCREEN_TITLE = "pyweek32-neverending"
+SCREEN_TITLE = "Lil Miss Vampire"
 
 
 class GameWindow(arcade.Window):
