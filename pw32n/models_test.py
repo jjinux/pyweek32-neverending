@@ -59,11 +59,11 @@ class CombatantModelTestCase(unittest.TestCase):
 
         self.model.on_battle_view_update(Secs(1.0))
         self.assertIsInstance(self.model.state, StunnedState)
-        self.assertTrue(self.model.give_it_a_whirl)
+        self.assertTrue(self.model.flip_sprite_upside_down)
 
         self.model.on_battle_view_update(Secs(1.0))
         self.assertIsInstance(self.model.state, IdleState)
-        self.assertFalse(self.model.give_it_a_whirl)
+        self.assertFalse(self.model.flip_sprite_upside_down)
         self.assertIsNone(self.model.current_workflow)
 
     def test_on_attacked_when_dodging(self) -> None:
