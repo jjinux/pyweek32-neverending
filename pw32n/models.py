@@ -33,8 +33,9 @@ class PlayerModel(Combatant):
 
 
 class EnemyModel(Combatant):
-    def __init__(self, strength: float) -> None:
+    def __init__(self, position: geography.OriginPoint, strength: float) -> None:
         super().__init__()
+        self.position = position
         self.strength = strength
 
 

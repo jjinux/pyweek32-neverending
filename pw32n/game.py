@@ -14,7 +14,12 @@ class GameWindow(arcade.Window):
         super().__init__(
             self.geo.screen_width, self.geo.screen_height, SCREEN_TITLE, resizable=True
         )
+
+        # The models exist "outside" of the sprites because we have two different
+        # views interacting with the same models.
         self.player_model = models.PlayerModel()
+        self.enemy_models: set[models.EnemyModel] = set()
+
         self.set_min_size(self.geo.min_screen_width, self.geo.min_screen_height)
         self.show_view(WorldView())
 
@@ -62,6 +67,12 @@ class WorldView(arcade.View):
         self.player_sprite.center_y = 0
 
         self.player_list.append(self.player_sprite)
+
+        for enemy_model in self.window.enemy_models:
+            self.create_enemy_sprite_from_model(enemy_model)
+
+        self.update_tiles(initial=True)
+
         self.camera_sprites = arcade.Camera(self.window.width, self.window.height)
         self.camera_gui = arcade.Camera(self.window.width, self.window.height)
 
@@ -73,7 +84,9 @@ class WorldView(arcade.View):
     def on_show(self) -> None:
         arcade.set_background_color(self.BACKGROUND_COLOR)
 
-    def get_tile(self, tile_point: geography.OriginPoint) -> tiles.Tile:
+    def get_tile(
+        self, tile_point: geography.OriginPoint, initial: bool = False
+    ) -> tiles.Tile:
         tile: tiles.Tile = self.geo.tile_map.get(tile_point)
         if tile is None:
             tile = self.pick_new_tile(tile_point)
@@ -82,7 +95,11 @@ class WorldView(arcade.View):
         # If we're calling get_tile, it's because we're walking in a certain direction and loading
         # tiles (pre-existing or not). If the tile is walkable, it's a good time to possibly put
         # a new enemy on that tile.
-        if tile.is_walkable:
+        #
+        # Don't do it when we're initially loading the view. First of all, it's okay if the user
+        # has to walk to see their first enemy. Secondly, if I don't do this, then it creates
+        # new enemies when I leave the BattleView.
+        if tile.is_walkable and not initial:
             self.possibly_create_an_enemy(tile_point)
 
         return tile
@@ -120,16 +137,25 @@ class WorldView(arcade.View):
         if random.randrange(150) != 0:
             return
         enemy_strength = models.pick_enemy_strength(op)
-        enemy_model = models.EnemyModel(enemy_strength)
-        enemy = enemy_sprites.EnemySprite(
-            enemy_model,
+        enemy_model = models.EnemyModel(position=op, strength=enemy_strength)
+        self.window.enemy_models.add(enemy_model)
+        self.create_enemy_sprite_from_model(enemy_model)
+
+    def create_enemy_sprite_from_model(
+        self, model: models.EnemyModel
+    ) -> enemy_sprites.EnemySprite:
+        sprite = enemy_sprites.EnemySprite(
+            model,
             sprite_images.ZOMBIE_IMAGE.filename,
             scale=(self.geo.tile_width / sprite_images.ZOMBIE_IMAGE.width),
         )
-        ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(op)
-        enemy.left = ap.x
-        enemy.top = ap.y
-        self.enemy_sprite_list.append(enemy)
+        ap: geography.AdventurePoint = self.geo.origin_point_to_adventure_point(
+            model.position
+        )
+        sprite.left = ap.x
+        sprite.top = ap.y
+        self.enemy_sprite_list.append(sprite)
+        return sprite
 
     def on_draw(self) -> None:
         arcade.start_render()
@@ -215,7 +241,7 @@ class WorldView(arcade.View):
             enemy_model = enemy_hit_list[0].model
             self.window.show_view(BattleView(enemy_model))
 
-    def update_tiles(self) -> None:
+    def update_tiles(self, initial: bool = False) -> None:
         """Add and remove tiles as the user "moves" around."""
         prev_tile_points = set(self.sprite_map.keys())
         new_tile_points = set(self.geo.generate_tile_points())
@@ -224,7 +250,7 @@ class WorldView(arcade.View):
             sprite = self.sprite_map.pop(tile_point)
             sprite.kill()  # type: ignore
         for tile_point in tile_point_diff.added:
-            tile = self.get_tile(tile_point)
+            tile = self.get_tile(tile_point, initial=initial)
             sprite = arcade.Sprite(
                 tile.sprite_image.filename,
                 scale=(self.geo.tile_width / tile.sprite_image.width),
@@ -304,7 +330,7 @@ class BattleView(arcade.View):
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         # For now, hitting escape just kills the enemy.
         if symbol == arcade.key.ESCAPE:
-            self.enemy_model.strength = 0.0
+            self.window.enemy_models.remove(self.enemy_model)
             self.window.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:

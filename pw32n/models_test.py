@@ -30,7 +30,7 @@ class PlayerModelTestCase(unittest.TestCase):
 
 class EnemyModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.enemy_model = EnemyModel(strength=10.0)
+        self.enemy_model = EnemyModel(position=OriginPoint(0, 0), strength=10.0)
 
     def test_dying(self) -> None:
         self.enemy_model.strength -= 100.0
