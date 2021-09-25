@@ -379,7 +379,6 @@ class BattleView(arcade.View):
     ) -> None:
         delta_x = 0
         delta_y = 0
-        rotation = 0.0
 
         if isinstance(model.state, models.WarmingUpState):
             delta_x = round(
@@ -406,18 +405,17 @@ class BattleView(arcade.View):
                 * (1.0 - model.current_workflow.completion_ratio_for_current_step)
                 * self.MAX_PLAYER_MOVEMENT
             )
-        elif isinstance(model.state, models.StunnedState):
-            rotation = 30.0
 
         if left is not None:
             sprite.left = left + delta_x
-            if rotation != 0:
-                sprite.turn_right(rotation)
         elif right is not None:
             sprite.right = right - delta_x
-            if rotation != 0:
-                sprite.turn_left(rotation)
         sprite.bottom = bottom + delta_y
+
+        if model.flip_sprite_upside_down:
+            sprite.angle = 180
+        elif sprite.angle != 0:
+            sprite.angle = 0
 
     def on_show(self) -> None:
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
