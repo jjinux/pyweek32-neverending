@@ -165,7 +165,9 @@ class WorldView(arcade.View):
         if random.randrange(150) != 0:
             return
         enemy_strength = models.pick_enemy_strength(op)
-        enemy_model = models.EnemyModel(position=op, strength=enemy_strength)
+        enemy_model = models.EnemyModel(
+            position=op, strength=enemy_strength, player_model=self.window.player_model
+        )
         self.window.enemy_models.add(enemy_model)
         self.create_enemy_sprite_from_model(enemy_model)
 
@@ -379,8 +381,16 @@ class BattleView(arcade.View):
 
         # For now, hitting escape just kills the enemy.
         elif symbol == arcade.key.ESCAPE:
-            self.window.on_enemy_died(self.enemy_model)
-            self.window.show_view(WorldView())
+            self.on_enemy_died()
+
+    def on_update(self, delta_time: float) -> None:
+        self.enemy_model.on_battle_view_update(delta_time)
+        if self.enemy_model.is_dead:
+            self.on_enemy_died()
+
+    def on_enemy_died(self) -> None:
+        self.window.on_enemy_died(self.enemy_model)
+        self.window.show_view(WorldView())
 
     def on_resize(self, width: float, height: float) -> None:
         # There is no superclass method, but this method definitely gets called.

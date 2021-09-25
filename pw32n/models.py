@@ -34,15 +34,28 @@ class PlayerModel(CombatantModel):
 
 
 class EnemyModel(CombatantModel):
-    def __init__(self, position: geography.OriginPoint, strength: float) -> None:
+    AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING = 45
+
+    def __init__(
+        self,
+        position: geography.OriginPoint,
+        strength: float,
+        player_model: PlayerModel,
+    ) -> None:
         super().__init__()
         self.position = position
         self.strength = strength
+        self.player_model = player_model
 
     @property
     def is_dead(self) -> bool:
         """Only enemies can die. The player is immortal."""
         return self.strength == 0.0
+
+    def on_battle_view_update(self, delta_time: float) -> None:
+        if random.randrange(self.AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING) == 0:
+            attack = random.choice([JAB_STRENGTH, UPPERCUT_STRENGTH])
+            self.player_model.on_attacked(attack)
 
 
 def pick_enemy_strength(op: geography.OriginPoint) -> float:

@@ -43,13 +43,16 @@ class PlayerModelTestCase(unittest.TestCase):
 
 class EnemyModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.model = EnemyModel(position=OriginPoint(0, 0), strength=10.0)
+        self.player_model = PlayerModel()
+        self.enemy_model = EnemyModel(
+            position=OriginPoint(0, 0), strength=10.0, player_model=self.player_model
+        )
 
     def test_dying(self) -> None:
-        self.assertFalse(self.model.is_dead)
-        self.model.strength -= 100.0
-        self.assertEqual(self.model.strength, 0.0)
-        self.assertTrue(self.model.is_dead)
+        self.assertFalse(self.enemy_model.is_dead)
+        self.enemy_model.strength -= 100.0
+        self.assertEqual(self.enemy_model.strength, 0.0)
+        self.assertTrue(self.enemy_model.is_dead)
 
 
 class PickEnemyStrengthTestCase(unittest.TestCase):
