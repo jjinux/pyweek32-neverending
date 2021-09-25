@@ -51,7 +51,7 @@ class CombatantModel:
         self.current_workflow: TimedWorkflow = None
         self.current_battle_move: battle_moves.BattleMove = None
         self.other: CombatantModel = None
-        self.doding = False
+        self.dodging = False
 
     @property
     def strength(self) -> float:
@@ -65,6 +65,9 @@ class CombatantModel:
         self.strength_at_the_beginning_of_battle = self.strength
 
     def on_attacked(self, power: float) -> None:
+        if self.dodging or isinstance(self.state, StunnedState):
+            return
+
         self.strength -= power
 
     def attempt_battle_move(

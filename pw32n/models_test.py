@@ -16,6 +16,7 @@ from pw32n.models import (
     WarmingUpState,
     ExecutingMoveState,
     CoolingDownState,
+    StunnedState,
     BATTLE_MOVE_WORKFLOW,
 )
 from pw32n.units import Secs
@@ -49,6 +50,18 @@ class CombatantModelTestCase(unittest.TestCase):
         self.model.strength = 1.0
         self.model.on_attacked(100.0)
         self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+
+    def test_on_attacked_when_dodging(self) -> None:
+        self.model.strength = 5.0
+        self.model.dodging = True
+        self.model.on_attacked(5.0)
+        self.assertEqual(self.model.strength, 5.0)
+
+    def test_on_attacked_when_stunned(self) -> None:
+        self.model.strength = 5.0
+        self.model.state = StunnedState()
+        self.model.on_attacked(5.0)
+        self.assertEqual(self.model.strength, 5.0)
 
     def test_battle_move_workflow(self) -> None:
         self.assertIsInstance(self.model.state, IdleState)
@@ -92,7 +105,7 @@ class CombatantModelTestCase(unittest.TestCase):
         self.assertIsNone(self.model.other)
 
     def test_battle_move_workflow_for_dodging(self) -> None:
-        self.assertFalse(self.model.doding)
+        self.assertFalse(self.model.dodging)
         other = CombatantModel()
         self.model.attempt_battle_move(battle_moves.DODGE, other)
         num_steps = len(self.model.current_workflow.steps)
