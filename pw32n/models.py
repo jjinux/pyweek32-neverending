@@ -1,3 +1,6 @@
+# See: https://mypy.readthedocs.io/en/latest/runtime_troubles.html?highlight=forward#class-name-forward-references
+from __future__ import annotations
+
 import math
 import random
 from typing import Any, cast
@@ -54,8 +57,7 @@ class PlayerModel(CombatantModel):
             self.strength -= self.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING
             self.time_since_losing_strength_while_walking = Secs(0.0)
 
-    def on_enemy_died(self, enemy: Any) -> None:
-        enemy = cast(EnemyModel, enemy)  # Circular dependency :(
+    def on_enemy_died(self, enemy: EnemyModel) -> None:
         self.strength += enemy.strength_at_the_beginning_of_battle
 
 
