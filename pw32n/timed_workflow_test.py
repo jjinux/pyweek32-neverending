@@ -50,7 +50,8 @@ class TimedWorkflowExample:
         self.state = State2()
         self.last_late_by = late_by
 
-        # Remember to clean up.
+        # Remember to clean up. You might want to set self.main_workflow to None as well. I can't
+        # do that here because I need it in the test.
         self.running_workflows.remove(self.main_workflow)
 
 
