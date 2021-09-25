@@ -2,6 +2,7 @@ import math
 import random
 
 from pw32n import geography
+from pw32n.units import Secs
 
 MIN_INITIAL_ENEMY_STRENGTH_TO_PICK = 0.1
 RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH = 0.001
@@ -31,6 +32,22 @@ class CombatantModel:
 class PlayerModel(CombatantModel):
     # Players can't die.
     MIN_STRENGTH = 1.0
+
+    TIME_BEFORE_LOSING_STRENGTH_WHILE_WALKING = Secs(2.0)
+    AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING = 0.1
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.time_since_losing_strength_while_walking = Secs(0.0)
+
+    def on_world_view_update(self, delta_time: float) -> None:
+        self.time_since_losing_strength_while_walking += delta_time
+        if (
+            self.time_since_losing_strength_while_walking
+            >= self.TIME_BEFORE_LOSING_STRENGTH_WHILE_WALKING
+        ):
+            self.strength -= self.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING
+            self.time_since_losing_strength_while_walking = Secs(0.0)
 
 
 class EnemyModel(CombatantModel):

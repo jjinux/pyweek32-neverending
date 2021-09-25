@@ -10,6 +10,7 @@ from pw32n.models import (
     MIN_INITIAL_ENEMY_STRENGTH_TO_PICK,
     RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH,
 )
+from pw32n.units import Secs
 
 
 class CombatantModelTestCase(unittest.TestCase):
@@ -39,6 +40,20 @@ class PlayerModelTestCase(unittest.TestCase):
 
     def test_min_strength(self) -> None:
         self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+
+    def test_on_world_view_update_makes_you_lose_strength_while_walking(self) -> None:
+        initial_strength = Secs(2.0)
+        self.model.strength = initial_strength
+        self.model.on_world_view_update(0.0)
+        self.assertEqual(self.model.strength, initial_strength)
+
+        self.model.on_world_view_update(
+            PlayerModel.TIME_BEFORE_LOSING_STRENGTH_WHILE_WALKING
+        )
+        self.assertEqual(
+            self.model.strength,
+            initial_strength - PlayerModel.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING,
+        )
 
 
 class EnemyModelTestCase(unittest.TestCase):

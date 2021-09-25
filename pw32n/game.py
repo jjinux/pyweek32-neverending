@@ -234,7 +234,7 @@ class WorldView(arcade.View):
             self.geo.position.x + delta_x, self.geo.position.y + delta_y
         )
 
-        self.window.player_model.strength += (abs(delta_x) + abs(delta_y)) * 0.001
+        self.window.player_model.on_world_view_update(delta_time)
 
         # Put the player back where he was (at the center of the universe) and instead move the
         # world in the *opposite* direction.
