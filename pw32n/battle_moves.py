@@ -24,7 +24,7 @@ DODGE = BattleMove(
     delta_y=0,
 )
 JAB = BattleMove(
-    base_strength=0.1,
+    base_strength=1,
     warmup_period=Secs(0.15),
     execution_period=Secs(0.15),
     cooldown_period=Secs(0.15),
@@ -32,7 +32,7 @@ JAB = BattleMove(
     delta_y=0,
 )
 UPPERCUT = BattleMove(
-    base_strength=0.3,
+    base_strength=3,
     warmup_period=Secs(0.5),
     execution_period=Secs(0.5),
     cooldown_period=Secs(0.2),
