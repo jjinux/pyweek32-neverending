@@ -54,10 +54,8 @@ class PlayerModel(CombatantModel):
             self.strength -= self.AMOUNT_OF_STRENGTH_LOST_WHILE_WALKING
             self.time_since_losing_strength_while_walking = Secs(0.0)
 
-    # I have a circular dependency between PlayerModel and EnemyModel :(
-    # Each needs to interact with the other, so I need to use Any and cast here.
     def on_enemy_died(self, enemy: Any) -> None:
-        enemy = cast(EnemyModel, enemy)
+        enemy = cast(EnemyModel, enemy)  # Circular dependency :(
         self.strength += enemy.strength_at_the_beginning_of_battle
 
 
