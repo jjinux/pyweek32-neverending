@@ -2,6 +2,7 @@ import unittest
 
 from pw32n.geography import OriginPoint
 from pw32n.models import (
+    CombatantModel,
     PlayerModel,
     EnemyModel,
     pick_enemy_strength,
@@ -11,31 +12,44 @@ from pw32n.models import (
 )
 
 
-class PlayerModelTestCase(unittest.TestCase):
+class CombatantModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.player_model = PlayerModel()
+        self.model = CombatantModel()
 
     def test_is_min_strength_by_default(self) -> None:
-        self.assertEqual(self.player_model.strength, self.player_model.MIN_STRENGTH)
+        self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
 
     def test_can_go_above_min_strength(self) -> None:
-        self.player_model.strength = 2.0
-        self.assertEqual(self.player_model.strength, 2.0)
+        self.model.strength = 2.0
+        self.assertEqual(self.model.strength, 2.0)
 
     def test_cannot_go_below_min_strength(self) -> None:
-        self.player_model.strength = -1.0
-        self.assertEqual(self.player_model.strength, self.player_model.MIN_STRENGTH)
-        self.assertFalse(self.player_model.is_dead)
+        self.model.strength = -1.0
+        self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+
+    def test_on_attacked(self) -> None:
+        self.model.strength = 1.0
+        self.model.on_attacked(100.0)
+        self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
+
+
+class PlayerModelTestCase(unittest.TestCase):
+    def setUp(self) -> None:
+        self.model = PlayerModel()
+
+    def test_min_strength(self) -> None:
+        self.assertEqual(self.model.strength, self.model.MIN_STRENGTH)
 
 
 class EnemyModelTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.enemy_model = EnemyModel(position=OriginPoint(0, 0), strength=10.0)
+        self.model = EnemyModel(position=OriginPoint(0, 0), strength=10.0)
 
     def test_dying(self) -> None:
-        self.enemy_model.strength -= 100.0
-        self.assertEqual(self.enemy_model.strength, 0.0)
-        self.assertTrue(self.enemy_model.is_dead)
+        self.assertFalse(self.model.is_dead)
+        self.model.strength -= 100.0
+        self.assertEqual(self.model.strength, 0.0)
+        self.assertTrue(self.model.is_dead)
 
 
 class PickEnemyStrengthTestCase(unittest.TestCase):
