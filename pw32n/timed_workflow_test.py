@@ -1,17 +1,30 @@
+from typing import NamedTuple, Union
 import unittest
 
 from pw32n.timed_workflow import TimedWorkflow, TimedStep
 from pw32n.units import Secs
 
+# Heh, algebraic types :)
+class State0(NamedTuple):
+    pass
+
+
+class State1(NamedTuple):
+    pass
+
+
+class State2(NamedTuple):
+    pass
+
+
+ExampleState = Union[State0, State1, State2]
+
 
 class TimedWorkflowExample:
     MAIN_WORKFLOW = "MAIN_WORKFLOW"
-    STATE_0 = "STATE_0"
-    STATE_1 = "STATE_1"
-    STATE_2 = "STATE_2"
 
     def __init__(self) -> None:
-        self.state = self.STATE_0
+        self.state: ExampleState = State0()
         self.last_late_by: Secs = None
         self.main_workflow = TimedWorkflow(
             name=self.MAIN_WORKFLOW,
@@ -30,11 +43,11 @@ class TimedWorkflowExample:
 
     def enter_state_1(self, late_by: Secs) -> None:
         assert self.main_workflow.completion_ratio_for_current_step == 1.0
-        self.state = self.STATE_1
+        self.state = State1()
         self.last_late_by = late_by
 
     def enter_state_2(self, late_by: Secs) -> None:
-        self.state = self.STATE_2
+        self.state = State2()
         self.last_late_by = late_by
 
         # Remember to clean up.
@@ -46,7 +59,7 @@ class TimedWorkflowTestCase(unittest.TestCase):
         self.example = TimedWorkflowExample()
 
     def test_entire_workflow(self) -> None:
-        self.assertEqual(self.example.state, TimedWorkflowExample.STATE_0)
+        self.assertIsInstance(self.example.state, State0)
         self.assertIsNone(self.example.last_late_by)
 
         self.example.on_update(Secs(1.0))
@@ -55,17 +68,17 @@ class TimedWorkflowTestCase(unittest.TestCase):
         self.assertEqual(
             self.example.main_workflow.completion_ratio_for_current_step, 1.0 / 1000.0
         )
-        self.assertEqual(self.example.state, TimedWorkflowExample.STATE_0)
+        self.assertIsInstance(self.example.state, State0)
 
         self.example.on_update(Secs(1000.0))
-        self.assertEqual(self.example.state, TimedWorkflowExample.STATE_1)
+        self.assertIsInstance(self.example.state, State1)
         self.assertEqual(self.example.last_late_by, Secs(1.0))
 
         self.example.on_update(Secs(1.0))
-        self.assertEqual(self.example.state, TimedWorkflowExample.STATE_1)
+        self.assertIsInstance(self.example.state, State1)
 
         self.example.on_update(Secs(1000.0))
-        self.assertEqual(self.example.state, TimedWorkflowExample.STATE_2)
+        self.assertIsInstance(self.example.state, State2)
         self.assertEqual(self.example.last_late_by, Secs(1.0))
 
         self.assertEqual(len(self.example.running_workflows), 0)
