@@ -4,14 +4,11 @@ from __future__ import annotations
 import math
 import random
 
-from pw32n import geography
-from pw32n import sprite_images
+from pw32n import geography, sprite_images, battle_moves
 from pw32n.units import Secs
 
 MIN_INITIAL_ENEMY_STRENGTH_TO_PICK = 0.1
 RATIO_OF_DISTANCE_TO_ENEMY_STRENGTH = 0.001
-JAB_STRENGTH = 0.1
-UPPERCUT_STRENGTH = 0.2
 
 
 class CombatantModel:
@@ -35,6 +32,15 @@ class CombatantModel:
 
     def on_attacked(self, power: float) -> None:
         self.strength -= power
+
+    def attempt_dodge(self, other: CombatantModel) -> None:
+        pass
+
+    def attempt_jab(self, other: CombatantModel) -> None:
+        other.on_attacked(battle_moves.JAB.base_strength)
+
+    def attempt_uppercut(self, other: CombatantModel) -> None:
+        other.on_attacked(battle_moves.UPPERCUT.base_strength)
 
 
 class PlayerModel(CombatantModel):
@@ -84,8 +90,10 @@ class EnemyModel(CombatantModel):
 
     def on_battle_view_update(self, delta_time: float) -> None:
         if random.randrange(self.AVERAGE_NUMBER_OF_TICKS_BEFORE_ATTACKING) == 0:
-            attack = random.choice([JAB_STRENGTH, UPPERCUT_STRENGTH])
-            self.player_model.on_attacked(attack)
+            move = random.choice(
+                [self.attempt_dodge, self.attempt_jab, self.attempt_uppercut]
+            )
+            move(self.player_model)
 
 
 def pick_enemy_strength(op: geography.OriginPoint) -> float:
