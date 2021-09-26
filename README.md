@@ -38,11 +38,10 @@ Development:
 Limitations:
 
 * Obviously, it would have been better with some custom artwork, some sounds, and a lot more animations.
-
+* Note that the arcade library requires OpenGL 3.3 and thus won't currently run on a Raspberry Pi.
 
 ## Setup
 
-Note that the arcade library requires OpenGL 3.3 and thus won't currently run on a Raspberry Pi.
 
 Install Python 3.9.7. I used pyenv on a Mac, but you can do whatever suits you:
 
