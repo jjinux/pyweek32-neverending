@@ -35,7 +35,7 @@ Development:
 
 * I built the game with two of my kids, Giovanni and Greggory.
 
-* I walked them through building some of the initial screen elements. Then, I built all the hard parts like the `Geography` class and `TimedWorkflow`.
+* I walked them through building some of the initial screen elements. Then, I built all the hard parts like the `Geography` class and `TimedWorkflowExample`.
 
 Limitations:
 
