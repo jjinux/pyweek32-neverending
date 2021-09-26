@@ -5,7 +5,7 @@
 
 ![battle_view](images/battle_view.png)
 
-My kids and I built this entry for [PyWeek 32](https://pyweek.org/) based on the theme "Neverending".
+My younger kids and I built this entry for [PyWeek 32](https://pyweek.org/) based on the theme "Neverending".
 
 The key innovations are:
 
