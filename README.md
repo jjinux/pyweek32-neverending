@@ -5,7 +5,7 @@
 
 ![battle_view](images/battle_view.png)
 
-![game_play](https://s3.eu-west-2.amazonaws.com/media.pyweek.org/32/jjinux-pyweek32/gameplay.mp4)
+https://user-images.githubusercontent.com/74551/134789160-7e448c30-2164-4d9e-8e25-c53fc6e3b06d.mp4
 
 My younger kids and I built [this entry for PyWeek 32](https://pyweek.org/e/jjinux-pyweek32/) based on the theme "Neverending".
 
