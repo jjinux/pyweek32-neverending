@@ -19,7 +19,7 @@ The gameplay:
 * As you know, the life of a vampire is neverending. Hence, Lil Miss Vampire can never die. Her goal is the same as every vampire's goal: to grow in strength, which she does by vanquishing enemies.
 * As she gets further away from the origin, the enemies get harder. As she gains in strength, her attacks get stronger. If you just walk around, you slowly lose strength.
 * Walk around by using the arrow keys. When you're in a battle, there are instructions on the screen.
-* There's a fun dynamic where you can get a hint as to what the opponent is going to throw at you, so you can try to counter it. Both attacks and blocks have a cool down period during which you are vulnerable.
+* There's a fun dynamic where you can get a hint as to what the opponent is going to throw at you, so you can try to counter it. Both attacks and dodging have a cool down period during which you are vulnerable.
 * If, for some reason, you can't move in the beginning, just restart the game.
 
 The code:
